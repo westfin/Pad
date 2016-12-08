@@ -44,7 +44,9 @@
                     <adoc:LayoutPanel>
                         <adoc:LayoutAnchorablePaneGroup DockWidth="100">
                             <adoc:LayoutAnchorablePane>
-                                <adoc:LayoutAnchorable Title="Variables">
+                                <adoc:LayoutAnchorable
+                                    CanClose="False"
+                                    Title="Variables">
                                     <DockPanel Grid.IsSharedSizeScope="True">
                                         <Grid DockPanel.Dock="Top">
                                             <Grid.ColumnDefinitions>
@@ -82,7 +84,7 @@
                                                   VirtualizingPanel.IsVirtualizing="True"
                                                   VirtualizingPanel.VirtualizationMode="Recycling">
                                                 <ItemsControl.ItemTemplate>
-                                                    <HierarchicalDataTemplate ItemsSource="{Binding Children, Mode=OneTime}">
+                                                    <HierarchicalDataTemplate ItemsSource="{Binding Childrens, Mode=OneTime}">
                                                         <Grid>
                                                             <Grid.ColumnDefinitions>
                                                                 <ColumnDefinition SharedSizeGroup="ResultNameGroup"/>
@@ -101,8 +103,12 @@
                                         </DockPanel>
                                     </adoc:LayoutAnchorable>
                                 
-                                <adoc:LayoutAnchorable Title="Tables" />
-                                <adoc:LayoutAnchorable Title="Charts" />
+                                <adoc:LayoutAnchorable
+                                    CanClose="False"
+                                    Title="Tables" />
+                                <adoc:LayoutAnchorable
+                                    CanClose="False"
+                                    Title="Charts" />
                             </adoc:LayoutAnchorablePane>
                         </adoc:LayoutAnchorablePaneGroup>
                     </adoc:LayoutPanel>

@@ -13,6 +13,7 @@ namespace LinqPad.ViewModels
     {
         private OpenDocumentViewModel currentDocumentViewModel;
         private ObservableCollection<OpenDocumentViewModel> openDocuments;
+        private ObservableCollection<DocumentViewModel>     documents;
 
         private readonly RoslynEditorHost roslynHost = new RoslynEditorHost();
         public RoslynEditorHost RoslynHost
@@ -23,11 +24,23 @@ namespace LinqPad.ViewModels
         public MainViewModel()
         {
             OpenDocuments = new ObservableCollection<OpenDocumentViewModel>();
-
+            documents     = new ObservableCollection<DocumentViewModel>();
+            documents.Add(new DocumentViewModel(@"C:\Users\Ivan\Documents\RoslynPad\Samples", true));
             if (!IsOpenAnyDocuments)
                 CreateDocument();
         }
 
+        public ObservableCollection<DocumentViewModel> Documents
+        {
+            get { return documents; }
+            set
+            {
+                if (documents == value)
+                    return;
+                documents = value;
+                OnPropertyChanged(nameof(Documents));
+            }
+        }
         public ObservableCollection<OpenDocumentViewModel> OpenDocuments
         {
             get { return openDocuments; }

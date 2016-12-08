@@ -18,8 +18,8 @@ namespace LinqPad
         public string  TypeName => typeName;
 
 
-        private ObservableCollection<ResultObject> children;
-        public  ObservableCollection<ResultObject> Children => children;
+        private ObservableCollection<ResultObject> childrens;
+        public  ObservableCollection<ResultObject> Childrens => childrens;
 
         public ResultObject(object value, string header = "")
         {
@@ -27,12 +27,12 @@ namespace LinqPad
             this.value    = value;
             this.typeName = value.GetType().Name;
             var enumerable = value as IEnumerable;
-            children = new ObservableCollection<ResultObject>();
+            childrens = new ObservableCollection<ResultObject>();
             if (enumerable !=null)
             {
                 foreach (var item in enumerable)
                 {
-                    children.Add(new ResultObject(item));
+                    childrens.Add(new ResultObject(item));
                 }
             }
         }

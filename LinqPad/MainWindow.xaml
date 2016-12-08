@@ -16,7 +16,7 @@
         <DataTemplate DataType="{x:Type models:OpenDocumentViewModel}">
             <views:DocumentView/>
         </DataTemplate>
-        
+
     </FrameworkElement.Resources>
     <Grid>
         <adoc:DockingManager x:Name="dockingManager"
@@ -30,7 +30,20 @@
             <adoc:LayoutRoot>
                 <adoc:LayoutPanel>
                     <adoc:LayoutAnchorablePane DockWidth="200">
-                        <adoc:LayoutAnchorable Title="Documents">
+                        <adoc:LayoutAnchorable
+                            CanHide="False"
+                            CanClose="False"
+                            Title="Documents">
+                            <TreeView ItemsSource="{Binding Documents}">
+                                <ItemsControl.ItemTemplate>
+                                    <HierarchicalDataTemplate ItemsSource="{Binding Childrens}">
+                                        <StackPanel Orientation="Horizontal">
+                                            <Image></Image>
+                                            <TextBlock Text="{Binding Name}"></TextBlock>
+                                        </StackPanel>
+                                    </HierarchicalDataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </TreeView>
                         </adoc:LayoutAnchorable>
                     </adoc:LayoutAnchorablePane>
                     <adoc:LayoutAnchorablePane/>
