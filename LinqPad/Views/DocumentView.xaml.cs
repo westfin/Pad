@@ -1,20 +1,9 @@
-﻿using LinqPad.Editor;
+﻿using System.Linq;
+using LinqPad.Editor;
 using LinqPad.ViewModels;
-using Microsoft.CodeAnalysis.CSharp;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using Microsoft.CodeAnalysis;
 
 namespace LinqPad.Views
@@ -24,7 +13,9 @@ namespace LinqPad.Views
     /// </summary>
     public partial class DocumentView 
     {
-        private OpenDocumentViewModel viewModel;
+        private OpenDocumentViewModel  viewModel;
+        private DiagnosticsService     diagnosticService;
+        private LnqPadColorizerService colorizerService;
 
         public DocumentView()
         {
@@ -40,6 +31,70 @@ namespace LinqPad.Views
                 editor,
                 viewModel.MainViewModel.RoslynHost,
                 viewModel.DocumentId);
+
+            editor.SignatureHelpService = new SignatureHelpService(
+                viewModel.MainViewModel.RoslynHost,
+                viewModel.DocumentId);
+
+            colorizerService = new LnqPadColorizerService(editor);
+            editor.TextArea.TextView.BackgroundRenderers.Add(colorizerService);
+            diagnosticService = new DiagnosticsService(viewModel.MainViewModel.RoslynHost);
+            editor.TextChanged += Editor_TextChanged;
+            editor.ToolTipRequest = ToolTipRequest;
+        }
+
+        private void Editor_TextChanged(object sender, EventArgs e)
+        {
+            ProcessDiagnostics();
+        }
+
+        private async void ProcessDiagnostics()
+        {
+            colorizerService.Clear();
+            var diagnostics = await diagnosticService.GetDiagnostics(viewModel.DocumentId);
+            foreach (var diagnostic in diagnostics)
+            {
+                var start = diagnostic.Location.SourceSpan.Start;
+                var length = diagnostic.Location.SourceSpan.End - diagnostic.Location.SourceSpan.Start;
+                var marker = colorizerService.TryAdd(start, length);
+                if (marker != null)
+                {
+                    marker.MarkerColor = GetDiagnosticColor(diagnostic);
+                    marker.ToolTip = diagnostic.GetMessage();
+                }
+            }
+        }
+
+        private void ToolTipRequest(ToolTipArgs args)
+        {
+            if (!args.InDocument)
+                return;
+
+            var offset = editor.Document.GetOffset(args.LogicalPosition);
+
+            var markersAtOffset = colorizerService.GetMarkersAtOffset(offset);
+            var markerWithToolTip = markersAtOffset.FirstOrDefault(marker => marker.ToolTip != null);
+            if (markerWithToolTip != null)
+            {
+                args.SetToolTip(markerWithToolTip.ToolTip);
+            }
+        }
+
+        private static Color GetDiagnosticColor(Diagnostic diagnostic)
+        {
+            switch (diagnostic.Severity)
+            {
+                case DiagnosticSeverity.Info:
+                    return Colors.LimeGreen;
+                case DiagnosticSeverity.Warning:
+                    return Colors.DodgerBlue;
+                case DiagnosticSeverity.Hidden:
+                    return Colors.Green;
+                case DiagnosticSeverity.Error:
+                    return Colors.Red;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
     }
 }

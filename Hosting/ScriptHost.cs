@@ -20,7 +20,7 @@ namespace Host
 {
     public sealed class ScriptHost
     {
-        private static readonly string hostPath = "HostScript.exe";
+        private static readonly string hostPath = "LinqPad.Host.exe";
         private static readonly ManualResetEventSlim clientExited =
             new ManualResetEventSlim(false);
 
@@ -28,11 +28,9 @@ namespace Host
         private readonly IEnumerable<string> imports;
         private RemotionService remotionService;
 
-        //public ScriptHost(IEnumerable<string> references, IEnumerable<string>imports)
-        //{
-        //    this.references = references;
-        //    this.imports    = imports;
-        //}
+        public ScriptHost()
+        {
+        }
 
         public string ExecuteString(string code)
         {
@@ -43,12 +41,12 @@ namespace Host
         }
 
 
-        public string Execute(string code)
+        public void Execute(string code)
         {
             if (remotionService == null)
                 remotionService = TryStartProcess();
 
-            return remotionService.Service.ExecuteScript(code);
+            remotionService.Service.ExecuteScript(code);
         }
 
         public RemotionService TryStartProcess()
@@ -158,7 +156,7 @@ namespace Host
     public interface IScriptService
     {
         [OperationContract]
-        string ExecuteScript(string code);
+        void ExecuteScript(string code);
 
         [OperationContract]
         Task InitAsync(IEnumerable<string> references, IEnumerable<string> imports);
@@ -180,11 +178,10 @@ namespace Host
                 documentationMode: DocumentationMode.Parse,
                 kind: SourceCodeKind.Script);
 
-        public string ExecuteScript(string code)
+        public void ExecuteScript(string code)
         {
             var a = CSharpScript.Create(code);
-            var b = a.RunAsync().Result.ReturnValue;
-            return b.ToString();
+            var b = a.RunAsync();
         }
 
         public Task InitAsync(IEnumerable<string> references, IEnumerable<string> imports)

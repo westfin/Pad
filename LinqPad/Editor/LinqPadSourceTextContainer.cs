@@ -15,10 +15,8 @@ namespace LinqPad.Editor
     public class LinqPadSourceTextContainer : SourceTextContainer
     {
         private readonly TextEditor textEditor;
-
         private SourceText currentSourceText;
-
-        public TextDocument Document => textEditor.Document;
+        public  TextDocument Document => textEditor.Document;
 
         public LinqPadSourceTextContainer(TextEditor textEditor)
         {

@@ -13,7 +13,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using Host;
+using Microsoft.CodeAnalysis.CSharp.Scripting;
+using LinqPad.Editor;
 
 namespace LinqPad
 {
@@ -29,12 +30,8 @@ namespace LinqPad
         {
             InitializeComponent();
             DataContext = mainViewModel;
-        }
 
-        private void button_Click(object sender, RoutedEventArgs e)
-        {
-            ScriptHost service = new ScriptHost();
-            service.Execute("2");
+            Console.SetOut(new LinqPadOut());
         }
     }
 }

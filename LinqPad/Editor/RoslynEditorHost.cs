@@ -19,6 +19,8 @@ using System.Text.RegularExpressions;
 using System.IO;
 using System.Threading;
 using System.Composition;
+using System.Windows;
+using System.Globalization;
 
 namespace LinqPad.Editor
 {
@@ -26,14 +28,12 @@ namespace LinqPad.Editor
     {
         private int programId  = 0;
         private readonly MefHostServices host;
-
         private readonly CompositionContext compositionContext;
-
-        private readonly CSharpParseOptions parseOptions = new CSharpParseOptions(
-            languageVersion: LanguageVersion.CSharp6,
-            documentationMode: DocumentationMode.Parse,
-            kind: SourceCodeKind.Script
-            );
+        private readonly CSharpParseOptions parseOptions =
+            new CSharpParseOptions(
+                languageVersion: LanguageVersion.CSharp6,
+                documentationMode: DocumentationMode.Parse,
+                kind: SourceCodeKind.Script);
 
         private static readonly ImmutableArray<Type> defaultReferenceAssemblyTypes = new[] {
             typeof(object),
@@ -47,6 +47,7 @@ namespace LinqPad.Editor
             typeof(IEnumerable),
             typeof(Path),
             typeof(Assembly),
+            typeof(LinqPadExtensions),
         }.ToImmutableArray();
 
         private static readonly ImmutableArray<Assembly> defaultReferenceAssemblies =
@@ -57,15 +58,30 @@ namespace LinqPad.Editor
             }).ToImmutableArray();
 
         internal ImmutableArray<MetadataReference> DefaultReferences { get; }
+        internal ImmutableArray<string>            DefaultImports    { get; }
 
         private readonly ConcurrentDictionary<DocumentId, LinqPadWorkspace> workspaces
             = new ConcurrentDictionary<DocumentId, LinqPadWorkspace>();
 
 
+        private CSharpCompilationOptions CreateCompilationOptions()
+        {
+            var options = new CSharpCompilationOptions(
+                outputKind: OutputKind.NetModule,
+                usings: DefaultImports);
+            return options;
+        }
+
+
+        //Constructor
         public RoslynEditorHost(IEnumerable<Assembly> assemblies = null)
         {
             DefaultReferences = defaultReferenceAssemblies.Select(t => 
                 CreateMetadataReference(t.Location)).ToImmutableArray();
+
+            DefaultImports = defaultReferenceAssemblyTypes.
+                Select(x => x.Namespace).Distinct().
+                ToImmutableArray();
 
             compositionContext = new ContainerConfiguration().
             WithAssemblies(MefHostServices.DefaultAssemblies.Concat(new[] {
@@ -76,12 +92,12 @@ namespace LinqPad.Editor
             })).CreateContainer();
 
             host = MefHostServices.Create(compositionContext);
-
         }
 
         private MetadataReference CreateMetadataReference(string location)
         {
-            return MetadataReference.CreateFromFile(location);
+            return MetadataReference.CreateFromFile(
+                path: location);
         }
 
         public DocumentId AddDocument(LinqPadSourceTextContainer container)
@@ -105,6 +121,10 @@ namespace LinqPad.Editor
                 workspace.CurrentSolution.GetDocument(documentId) : null;
         }
 
+        public TService GetService<TService>()
+        {
+            return compositionContext.GetExport<TService>();
+        }
 
         public Project CreateProject(Solution solution)
         {
@@ -116,7 +136,8 @@ namespace LinqPad.Editor
                 assemblyName: name,
                 language: LanguageNames.CSharp,
                 parseOptions: parseOptions,
-                metadataReferences: DefaultReferences);
+                metadataReferences: DefaultReferences,
+                compilationOptions: CreateCompilationOptions());
 
             solution = solution.AddProject(projectInfo);
             return solution.GetProject(projectInfo.Id);
