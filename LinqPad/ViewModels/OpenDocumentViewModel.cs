@@ -10,6 +10,7 @@ using LinqPad.Commands;
 using System.Windows;
 using LinqPad.Execution;
 using System.Collections.ObjectModel;
+using System.IO;
 
 namespace LinqPad.ViewModels
 {
@@ -76,7 +77,22 @@ namespace LinqPad.ViewModels
             return text.ToString();
         }
 
-        public string Title { get { return Document != null ? Document.Name : "New"; } }
+        public async Task<string> LoadText()
+        {
+            if (document == null)
+            {
+                return "";
+            }
 
+            using (var stream = new StreamReader(new FileStream(document.Path, FileMode.Open)))
+            {
+                return await stream.ReadToEndAsync();
+            }
+        }
+
+        public string Title
+        {
+            get { return Document != null ? Document.Name : "New"; }
+        }
     }
 }

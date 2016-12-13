@@ -84,6 +84,14 @@ namespace LinqPad.ViewModels
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
 
+        public void OpenDocument(DocumentViewModel source)
+        {
+            if (!source.IsFolder)
+            {
+                openDocuments.Add(new OpenDocumentViewModel(this, source));
+            }
+        }
+
         public event PropertyChangedEventHandler PropertyChanged;
     }
 }

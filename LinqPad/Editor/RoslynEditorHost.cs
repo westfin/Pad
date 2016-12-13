@@ -21,6 +21,7 @@ using System.Threading;
 using System.Composition;
 using System.Windows;
 using System.Globalization;
+using Microsoft.CodeAnalysis.Scripting;
 
 namespace LinqPad.Editor
 {
@@ -28,6 +29,7 @@ namespace LinqPad.Editor
     {
         private int programId  = 0;
         private readonly MefHostServices host;
+        private LinqPadResolver resolver;
         private readonly CompositionContext compositionContext;
         private readonly CSharpParseOptions parseOptions =
             new CSharpParseOptions(
@@ -57,8 +59,11 @@ namespace LinqPad.Editor
                 typeof(Microsoft.CSharp.RuntimeBinder.Binder).Assembly,
             }).ToImmutableArray();
 
-        internal ImmutableArray<MetadataReference> DefaultReferences { get; }
-        internal ImmutableArray<string>            DefaultImports    { get; }
+        public ImmutableArray<MetadataReference> DefaultReferences { get; }
+        public ImmutableArray<string>            DefaultImports    { get; }
+        //#r in current script document
+        public IList<string>                     ResolveReferences { get; }
+
 
         private readonly ConcurrentDictionary<DocumentId, LinqPadWorkspace> workspaces
             = new ConcurrentDictionary<DocumentId, LinqPadWorkspace>();
@@ -66,15 +71,18 @@ namespace LinqPad.Editor
 
         private CSharpCompilationOptions CreateCompilationOptions()
         {
+            resolver = new LinqPadResolver(new string[] { "C:\\" }.ToImmutableArray(), "C:\\");
             var options = new CSharpCompilationOptions(
                 outputKind: OutputKind.NetModule,
-                usings: DefaultImports);
+                usings: DefaultImports,
+                metadataReferenceResolver: resolver);
             return options;
         }
 
 
+
         //Constructor
-        public RoslynEditorHost(IEnumerable<Assembly> assemblies = null)
+        public RoslynEditorHost(IEnumerable<Assembly> addAssemblies = null)
         {
             DefaultReferences = defaultReferenceAssemblies.Select(t => 
                 CreateMetadataReference(t.Location)).ToImmutableArray();
@@ -83,13 +91,24 @@ namespace LinqPad.Editor
                 Select(x => x.Namespace).Distinct().
                 ToImmutableArray();
 
-            compositionContext = new ContainerConfiguration().
-            WithAssemblies(MefHostServices.DefaultAssemblies.Concat(new[] {
+            ResolveReferences = new List<string>();
+
+            var assemblies = new[]
+            {
                 Assembly.Load("Microsoft.CodeAnalysis"),
                 Assembly.Load("Microsoft.CodeAnalysis.CSharp"),
                 Assembly.Load("Microsoft.CodeAnalysis.Features"),
-                Assembly.Load("Microsoft.CodeAnalysis.CSharp.Features")
-            })).CreateContainer();
+                Assembly.Load("Microsoft.CodeAnalysis.CSharp.Features"),
+            };
+
+            var partTypes = MefHostServices.DefaultAssemblies.Concat(assemblies)
+                    .Distinct()
+                    .SelectMany(x => x.GetTypes())
+                    .ToArray();
+
+            compositionContext = new ContainerConfiguration()
+                            .WithParts(partTypes)
+                            .CreateContainer();
 
             host = MefHostServices.Create(compositionContext);
         }
@@ -151,6 +170,16 @@ namespace LinqPad.Editor
             workspace.OpenDocument(id, textContainer);
             return solution.GetDocument(id);
         }
+
+        public void ProcessResolveReferences(DocumentId id, IEnumerable<string> references)
+        {
+            var oldProject = GetDocument(id).Project;
+            LinqPadWorkspace workspace;
+            if (workspaces.TryGetValue(id, out workspace))
+            {
+                
+            }
+        }
     }
 
     public sealed class LinqPadWorkspace : Workspace
@@ -175,6 +204,35 @@ namespace LinqPad.Editor
             var oldSolution = CurrentSolution;
             var newSolution = base.SetCurrentSolution(solution);
             RaiseWorkspaceChangedEventAsync(WorkspaceChangeKind.SolutionChanged, oldSolution, newSolution);
+        }
+    }
+
+    public sealed class LinqPadResolver : MetadataReferenceResolver
+    {
+        private readonly ScriptMetadataResolver resolver;
+
+        public LinqPadResolver(ImmutableArray<string> searchPaths, string baseDirectory)
+        {
+            resolver = ScriptMetadataResolver.Default.
+                WithSearchPaths(searchPaths).
+                WithBaseDirectory(baseDirectory);
+        }
+
+        public override bool ResolveMissingAssemblies => resolver.ResolveMissingAssemblies;
+
+        public override bool Equals(object other)
+        {
+            return resolver.Equals(other);
+        }
+
+        public override int GetHashCode()
+        {
+            return resolver.GetHashCode();
+        }
+
+        public override ImmutableArray<PortableExecutableReference> ResolveReference(string reference, string baseFilePath, MetadataReferenceProperties properties)
+        {
+            return resolver.ResolveReference(reference, baseFilePath, properties);
         }
     }
 }

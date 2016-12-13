@@ -8,14 +8,32 @@
         xmlns:adoc ="http://schemas.xceed.com/wpf/xaml/avalondock"
         xmlns:models = "clr-namespace:LinqPad.ViewModels"
         xmlns:views = "clr-namespace:LinqPad.Views"
+        xmlns:ed="http://icsharpcode.net/sharpdevelop/avalonedit"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance models:MainViewModel}"
         Title="{Binding Title}" Height="350" Width="525">
 
     <FrameworkElement.Resources>
+        <!-- OpenDocumentViewmodel template -->
         <DataTemplate DataType="{x:Type models:OpenDocumentViewModel}">
             <views:DocumentView/>
         </DataTemplate>
+
+        <!-- DocumentViewmodel template -->
+        <HierarchicalDataTemplate DataType="{x:Type models:DocumentViewModel}"
+                                  ItemsSource="{Binding Childrens}">
+            <StackPanel Orientation="Horizontal">
+                <Image></Image>
+                <TextBlock Text="{Binding Name}"/>
+            </StackPanel>
+            <HierarchicalDataTemplate.ItemContainerStyle>
+                <Style TargetType="TreeViewItem">
+                    <EventSetter Event="MouseDoubleClick"
+                                 Handler="OnMouseDoubleClick">
+                    </EventSetter>
+                </Style>
+            </HierarchicalDataTemplate.ItemContainerStyle>
+        </HierarchicalDataTemplate>
 
     </FrameworkElement.Resources>
     <Grid>
@@ -34,19 +52,9 @@
                             CanHide="False"
                             CanClose="False"
                             Title="Documents">
-                            <TreeView ItemsSource="{Binding Documents}">
-                                <ItemsControl.ItemTemplate>
-                                    <HierarchicalDataTemplate ItemsSource="{Binding Childrens}">
-                                        <StackPanel Orientation="Horizontal">
-                                            <Image></Image>
-                                            <TextBlock Text="{Binding Name}"></TextBlock>
-                                        </StackPanel>
-                                    </HierarchicalDataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </TreeView>
+                            <TreeView ItemsSource="{Binding Documents}"/>
                         </adoc:LayoutAnchorable>
                     </adoc:LayoutAnchorablePane>
-                    <adoc:LayoutAnchorablePane/>
                     <adoc:LayoutDocumentPane/>
                 </adoc:LayoutPanel>
             </adoc:LayoutRoot>

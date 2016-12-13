@@ -5,6 +5,9 @@ using System;
 using System.Windows;
 using System.Windows.Media;
 using Microsoft.CodeAnalysis;
+using System.Threading.Tasks;
+using System.IO;
+using System.Threading;
 
 namespace LinqPad.Views
 {
@@ -16,13 +19,14 @@ namespace LinqPad.Views
         private OpenDocumentViewModel  viewModel;
         private DiagnosticsService     diagnosticService;
         private LnqPadColorizerService colorizerService;
+        private ReferencesProvider     referencesProvider;
 
         public DocumentView()
         {
             InitializeComponent();
         }
 
-        private void DocumentView_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        private async void DocumentView_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             viewModel = (OpenDocumentViewModel)e.NewValue;
             LinqPadSourceTextContainer container = new LinqPadSourceTextContainer(editor);
@@ -36,19 +40,39 @@ namespace LinqPad.Views
                 viewModel.MainViewModel.RoslynHost,
                 viewModel.DocumentId);
 
+            string text = await viewModel.LoadText();
+
+            referencesProvider = new ReferencesProvider(viewModel.MainViewModel.RoslynHost);
             colorizerService = new LnqPadColorizerService(editor);
             editor.TextArea.TextView.BackgroundRenderers.Add(colorizerService);
             diagnosticService = new DiagnosticsService(viewModel.MainViewModel.RoslynHost);
+            editor.AppendText(text);
             editor.TextChanged += Editor_TextChanged;
             editor.ToolTipRequest = ToolTipRequest;
         }
 
-        private void Editor_TextChanged(object sender, EventArgs e)
+        private async void Editor_TextChanged(object sender, EventArgs e)
         {
-            ProcessDiagnostics();
+            await ProcessDiagnostics();
         }
 
-        private async void ProcessDiagnostics()
+        private async Task ProcessReferences()
+        {
+            var references = await referencesProvider.
+                GetReferences(viewModel.DocumentId);
+
+            var host = viewModel.MainViewModel.RoslynHost;
+
+            if (references == null)
+                return;
+
+            if(File.Exists(references.First()))
+            {
+                host.ProcessResolveReferences(viewModel.DocumentId, references);
+            }
+        }
+
+        private async Task ProcessDiagnostics()
         {
             colorizerService.Clear();
             var diagnostics = await diagnosticService.GetDiagnostics(viewModel.DocumentId);
@@ -64,6 +88,7 @@ namespace LinqPad.Views
                 }
             }
         }
+
 
         private void ToolTipRequest(ToolTipArgs args)
         {

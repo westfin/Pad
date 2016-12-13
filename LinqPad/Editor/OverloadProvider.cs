@@ -88,12 +88,12 @@ namespace LinqPad.Editor
         private void BuildContent()
         {
             var item = signature.SignatureHelpItems[selectedIndex];
-            var counter = new TextBlock()
+            var counter = new TextBlock();
+            if (signature.SignatureHelpItems.Count > 1)
             {
-                Text = $"({selectedIndex + 1}:{signature.SignatureHelpItems.Count}) ",
-                FontWeight = FontWeights.Bold
-            };
-
+                counter.Text = $"({selectedIndex + 1}:{signature.SignatureHelpItems.Count}) ";
+                counter.FontWeight = FontWeights.Bold;
+            }
             var headerPanel = new WrapPanel()
             {
                 Orientation = Orientation.Horizontal,

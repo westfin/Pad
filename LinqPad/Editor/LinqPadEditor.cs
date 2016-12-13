@@ -166,10 +166,15 @@ namespace LinqPad.Editor
             //}
         }
 
-        private async void TextArea_TextEntered(object sender, TextCompositionEventArgs e)
+        private void TextArea_TextEntered(object sender, TextCompositionEventArgs e)
+        {
+            var task = ShowCompletion();
+        }
+
+        private async Task ShowCompletion()
         {
             var help = await signatureHelpService.GetSignatureHelp(CaretOffset);
-            if(help != null)
+            if (help != null)
             {
                 var provider = new OverloadProvider(help);
                 if (insightWindow == null)
@@ -185,16 +190,27 @@ namespace LinqPad.Editor
             }
 
             insightWindow?.Close();
-            var results = await intellisenseProvider.GetCompletioData(CaretOffset);
-            if (results != null && results.Count !=0)
+            var results = await intellisenseProvider.
+                GetCompletioData(CaretOffset, Document.GetCharAt(CaretOffset - 1)).
+                ConfigureAwait(true);
+
+            if (results?.Any() == true && completionWindow == null)
             {
-                completionWindow = new LinqPadCompletionWindow(TextArea) { Background = CompletionBackground };
-                completionWindow.Closed += (o, args) => { completionWindow = null; };
+                completionWindow = new LinqPadCompletionWindow(TextArea)
+                {
+                    Background = CompletionBackground,
+                    CloseWhenCaretAtBeginning = false
+                };
+                var data = completionWindow.CompletionList.CompletionData;
                 foreach (var item in results)
                 {
-                    completionWindow.CompletionList.CompletionData.Add(item);
+                    data.Add(item);
                 }
                 completionWindow.Show();
+                completionWindow.Closed += delegate
+                {
+                    completionWindow = null;
+                };
             }
         }
 

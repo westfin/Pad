@@ -224,7 +224,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="DiagnosticsService.cs" />
+    <Compile Include="Editor\DiagnosticsService.cs" />
     <Compile Include="Editor\CompletionData.cs" />
     <Compile Include="Editor\ExtensionsCompletionItem.cs" />
     <Compile Include="Editor\ExtensionsGlyph.cs" />
@@ -233,6 +233,7 @@
     <Compile Include="Editor\LinqPadOut.cs" />
     <Compile Include="Editor\LnqPadColorizerService.cs" />
     <Compile Include="Editor\OverloadProvider.cs" />
+    <Compile Include="Editor\ReferencesProvider.cs" />
     <Compile Include="Editor\RoslynEditorHost.cs" />
     <Compile Include="Editor\SignatureHelpService.cs" />
     <Compile Include="Editor\ToolTipArgs.cs" />

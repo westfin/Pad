@@ -10,6 +10,7 @@ using System.Windows.Media;
 using Microsoft.CodeAnalysis.Completion;
 using Microsoft.CodeAnalysis;
 using System.Diagnostics;
+using System.Windows;
 
 namespace LinqPad.Editor
 {
@@ -19,6 +20,8 @@ namespace LinqPad.Editor
         private CompletionItem completionItem;
         public CompletionData(CompletionItem item, Document document)
         {
+            var key = item.Tags.Aggregate((c, n)=> c+n);
+            //this.Image = Application.Current.FindResource(key) as ImageSource;
             this.completionItem = item;
             this.document = document;
             this.Text = item.DisplayText;

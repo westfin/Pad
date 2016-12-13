@@ -7,6 +7,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.CodeAnalysis.Shared.Extensions;
 
 namespace LinqPad.Editor
 {
@@ -216,8 +217,11 @@ namespace LinqPad.Editor
                         SymbolDisplayParameterOptions.IncludeType |
                         SymbolDisplayParameterOptions.IncludeName,
                     miscellaneousOptions:
-                        SymbolDisplayMiscellaneousOptions.UseSpecialTypes
-                    );
+                        SymbolDisplayMiscellaneousOptions.UseSpecialTypes,
+                    extensionMethodStyle:
+                        SymbolDisplayExtensionMethodStyle.InstanceMethod
+                    
+            );
         } 
     }
 

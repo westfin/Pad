@@ -30,8 +30,16 @@ namespace LinqPad
         {
             InitializeComponent();
             DataContext = mainViewModel;
-
             Console.SetOut(new LinqPadOut());
+        }
+
+        private void OnMouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            var documentViewModel = ((FrameworkElement)e.Source).DataContext as DocumentViewModel;
+            if (documentViewModel != null)
+            {
+                mainViewModel.OpenDocument(documentViewModel);
+            }
         }
     }
 }

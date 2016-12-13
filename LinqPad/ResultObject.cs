@@ -34,6 +34,8 @@ namespace LinqPad
                 {
                     childrens.Add(new ResultObject(item));
                 }
+                header = header == "" ? $"enumerable type {childrens.Count}" : header;
+
             }
         }
     }

@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LinqPad
+namespace LinqPad.Editor
 {
     public sealed class DiagnosticsService
     {
@@ -19,7 +19,7 @@ namespace LinqPad
 
         public async Task<List<Diagnostic>> GetDiagnostics(DocumentId documentId)
         {
-            var model = await host.GetDocument(documentId).GetSemanticModelAsync();
+            var model = await host.GetDocument(documentId).GetSemanticModelAsync().ConfigureAwait(false);
             var diagnostics = model.GetDiagnostics();
             return diagnostics.ToList();
         }
