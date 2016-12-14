@@ -36,7 +36,7 @@ namespace LinqPad.Commands
         {
             if(executeAsync !=null)
             {
-                ExecuteAsync();
+                 ExecuteAsync();
             }
             else
             {

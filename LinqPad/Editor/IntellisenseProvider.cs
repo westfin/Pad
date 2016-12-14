@@ -9,6 +9,7 @@ using Microsoft.CodeAnalysis.Text;
 using ICSharpCode.AvalonEdit;
 using Microsoft.CodeAnalysis.Completion;
 using System.Diagnostics;
+using Microsoft.CodeAnalysis.Options;
 
 namespace LinqPad.Editor
 {
@@ -31,11 +32,13 @@ namespace LinqPad.Editor
                 position,
                 GetCompletionTrigger(trieggerChar)).
                 ConfigureAwait(false);
+            
 
             if (data != null && data.Items.Any())
             {
-                result = data.Items.Select(i => new CompletionData(i, document)).
-                  ToList<ICompletionData>();
+                result = data.Items.
+                    Select(i => new CompletionData(i, document)).
+                    ToList<ICompletionData>();
             }
             else
             {

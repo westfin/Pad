@@ -170,16 +170,6 @@ namespace LinqPad.Editor
             workspace.OpenDocument(id, textContainer);
             return solution.GetDocument(id);
         }
-
-        public void ProcessResolveReferences(DocumentId id, IEnumerable<string> references)
-        {
-            var oldProject = GetDocument(id).Project;
-            LinqPadWorkspace workspace;
-            if (workspaces.TryGetValue(id, out workspace))
-            {
-                
-            }
-        }
     }
 
     public sealed class LinqPadWorkspace : Workspace

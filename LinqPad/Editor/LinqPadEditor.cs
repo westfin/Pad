@@ -24,8 +24,11 @@ namespace LinqPad.Editor
         public Action<ToolTipArgs> ToolTipRequest { get; set; }
 
 
-        public static readonly DependencyProperty CompletionBackgroundProperty = DependencyProperty.Register(
-            "CompletionBackground", typeof(Brush), typeof(LinqPadEditor), new FrameworkPropertyMetadata(CreateDefaultCompletionBackground()));
+        public static readonly DependencyProperty CompletionBackgroundProperty = 
+            DependencyProperty.Register(
+            "CompletionBackground", typeof(Brush),
+            typeof(LinqPadEditor),
+            new FrameworkPropertyMetadata(CreateDefaultCompletionBackground()));
 
         private static SolidColorBrush CreateDefaultCompletionBackground()
         {
@@ -159,8 +162,6 @@ namespace LinqPad.Editor
             //{
             //    if (!char.IsLetterOrDigit(e.Text[0]))
             //    {
-            //        // Whenever a non-letter is typed while the completion window is open,
-            //        // insert the currently selected element.
             //        completionWindow.CompletionList.RequestInsertion(e);
             //    }
             //}
@@ -168,7 +169,17 @@ namespace LinqPad.Editor
 
         private void TextArea_TextEntered(object sender, TextCompositionEventArgs e)
         {
-            var task = ShowCompletion();
+            ShowCompletion().ConfigureAwait(true);
+        }
+
+        protected override void OnKeyDown(KeyEventArgs e)
+        {
+            base.OnKeyDown(e);
+            if(e.Key == Key.Space && e.KeyboardDevice.Modifiers.HasFlag(ModifierKeys.Control))
+            {
+                ShowCompletion().ConfigureAwait(true);
+                e.Handled = true;
+            }
         }
 
         private async Task ShowCompletion()
@@ -199,8 +210,9 @@ namespace LinqPad.Editor
                 completionWindow = new LinqPadCompletionWindow(TextArea)
                 {
                     Background = CompletionBackground,
-                    CloseWhenCaretAtBeginning = false
+                    CloseWhenCaretAtBeginning = false,
                 };
+                completionWindow.CompletionList.IsFiltering = true;
                 var data = completionWindow.CompletionList.CompletionData;
                 foreach (var item in results)
                 {

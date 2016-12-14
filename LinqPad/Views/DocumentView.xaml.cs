@@ -56,22 +56,6 @@ namespace LinqPad.Views
             await ProcessDiagnostics();
         }
 
-        private async Task ProcessReferences()
-        {
-            var references = await referencesProvider.
-                GetReferences(viewModel.DocumentId);
-
-            var host = viewModel.MainViewModel.RoslynHost;
-
-            if (references == null)
-                return;
-
-            if(File.Exists(references.First()))
-            {
-                host.ProcessResolveReferences(viewModel.DocumentId, references);
-            }
-        }
-
         private async Task ProcessDiagnostics()
         {
             colorizerService.Clear();

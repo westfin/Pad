@@ -815,7 +815,7 @@
             </DrawingGroup>
         </DrawingImage.Drawing>
     </DrawingImage>
-    <DrawingImage x:Key="{x:Static completion:Glyph.Parameter}">
+    <DrawingImage x:Key="{x:Static completion:Glyph.TypeParameter}">
         <DrawingImage.Drawing>
             <DrawingGroup>
                 <DrawingGroup.Children>

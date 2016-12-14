@@ -35,10 +35,13 @@ namespace LinqPad
 
         private void OnMouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            var documentViewModel = ((FrameworkElement)e.Source).DataContext as DocumentViewModel;
-            if (documentViewModel != null)
+            if (e.LeftButton == MouseButtonState.Pressed)
             {
-                mainViewModel.OpenDocument(documentViewModel);
+                var documentViewModel = ((FrameworkElement)e.Source).DataContext as DocumentViewModel;
+                if (documentViewModel != null)
+                {
+                    mainViewModel.OpenDocument(documentViewModel);
+                }
             }
         }
     }

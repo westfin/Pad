@@ -24,7 +24,25 @@
                      BorderThickness="0,0,0,1">
                 <Button Command="{Binding RunCommand, Mode=OneTime}">
                     <Grid>
-                        <Image Source="{StaticResource ResourceKey = Run}"/>
+                        <Grid.RowDefinitions>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <Image Grid.Row="0" Source="{StaticResource ResourceKey = Run}"/>
+                        <ProgressBar Height="4" Grid.Row="1" IsIndeterminate="{Binding IsRunning}">
+                            <ProgressBar.Style>
+                                <Style TargetType="{x:Type ProgressBar}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsRunning}" Value="True">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding IsRunning}" Value="False">
+                                            <Setter Property="Visibility" Value="Hidden"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </ProgressBar.Style>
+                        </ProgressBar>
                     </Grid>
                 </Button>
             </ToolBar>

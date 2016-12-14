@@ -31,10 +31,9 @@ namespace LinqPad.Execution
             {
                 var script = CSharpScript.Create(code).
                     WithOptions(scriptOptions);
-
-                var a = await script.RunAsync();
+                await script.RunAsync().ConfigureAwait(false);
             }
-            catch(CompilationErrorException e)
+            catch (CompilationErrorException e)
             {
                 MessageBox.Show(e.Message);
             }

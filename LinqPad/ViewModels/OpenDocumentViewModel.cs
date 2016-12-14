@@ -11,22 +11,25 @@ using System.Windows;
 using LinqPad.Execution;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Windows.Threading;
 
 namespace LinqPad.ViewModels
 {
-    public class OpenDocumentViewModel
+    public class OpenDocumentViewModel : INotifyPropertyChanged
     {
         private DocumentViewModel     document;
         private MainViewModel         mainViewModel;
         private DocumentId            documentId;
         private readonly ScriptRunner scriptRunner;
+        private bool isRunning = false;
         public  ObservableCollection<ResultObject> results;
+        public event PropertyChangedEventHandler PropertyChanged;
 
         public OpenDocumentViewModel(MainViewModel mainViewModel, DocumentViewModel document)
         {
             this.mainViewModel = mainViewModel;
             this.document = document;
-            this.RunCommand = new DelegateCommand(new Action(Run));
+            this.RunCommand = new DelegateCommand(Run, ()=> !isRunning);
             this.scriptRunner = new ScriptRunner(
                 references: mainViewModel.RoslynHost.DefaultReferences.
                     OfType<PortableExecutableReference>().
@@ -46,9 +49,21 @@ namespace LinqPad.ViewModels
         public DocumentId        DocumentId         => documentId;
         public MainViewModel     MainViewModel      => mainViewModel;
         public ObservableCollection<ResultObject> Results => results;
+        public bool IsRunning
+        {
+            get { return isRunning; }
+            private set
+            {
+                if (isRunning == value)
+                    return;
+                isRunning = value;
+                OnRaisePropertyChanged(nameof(IsRunning));
+            }
+        }
+
 
         //Delegates commands
-        public DelegateCommand   RunCommand     { get; }
+        public DelegateCommand RunCommand     { get; }
 
 
         public void Init(LinqPadSourceTextContainer container)
@@ -61,11 +76,13 @@ namespace LinqPad.ViewModels
             return MainViewModel.RoslynHost.GetDocument(documentId);
         }
 
-        private async void Run()
+        private async Task Run()
         {
+            IsRunning = true;
             results.Clear();
             var code = await GetTextCode().ConfigureAwait(true);
-            await scriptRunner.ExecuteAsync(code);
+            await scriptRunner.ExecuteAsync(code).ConfigureAwait(true);
+            IsRunning = false;
         }
 
         private async Task<string> GetTextCode()
@@ -93,6 +110,11 @@ namespace LinqPad.ViewModels
         public string Title
         {
             get { return Document != null ? Document.Name : "New"; }
+        }
+
+        private void OnRaisePropertyChanged(string propName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propName));
         }
     }
 }

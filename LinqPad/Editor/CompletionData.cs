@@ -20,38 +20,18 @@ namespace LinqPad.Editor
         private CompletionItem completionItem;
         public CompletionData(CompletionItem item, Document document)
         {
-            var key = item.Tags.Aggregate((c, n)=> c+n);
-            //this.Image = Application.Current.FindResource(key) as ImageSource;
+            var key = item.GetGlyph();
+            this.Image = Application.Current.FindResource(key) as ImageSource;
             this.completionItem = item;
             this.document = document;
             this.Text = item.DisplayText;
             this.Content = item.DisplayText;
-
         }
-        public object Content
-        {
-            get;
-        }
-
-        public object Description
-        {
-            get;
-        }
-
-        public ImageSource Image
-        {
-            get;
-        }
-
-        public double Priority
-        {
-            get;
-        }
-
-        public string Text
-        {
-            get;
-        }
+        public object Content       { get; }
+        public object Description   { get; }
+        public ImageSource Image    { get; }
+        public double Priority      { get; }
+        public string Text          { get; }
 
         public async void Complete(TextArea textArea, ISegment completionSegment, EventArgs insertionRequestEventArgs)
         {
