@@ -1,0 +1,19 @@
+#r ".\Chapter11.exe"
+
+using Chapter11.Model;
+using Chapter11.Queries;
+
+var query = from defect in SampleData.AllDefects
+            where defect.AssignedTo != null
+            group defect by defect.AssignedTo into grouped
+            select new { Assignee=grouped.Key, 
+                         Count=grouped.Count() } into result
+            orderby result.Count descending
+            select result;
+
+foreach (var entry in query)
+{
+    Console.WriteLine("{0}: {1}",
+                      entry.Assignee.Name,
+                      entry.Count);
+}
