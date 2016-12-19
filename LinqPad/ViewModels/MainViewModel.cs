@@ -1,4 +1,5 @@
 ﻿using LinqPad.Editor;
+using OxyPlot;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -14,20 +15,45 @@ namespace LinqPad.ViewModels
         private OpenDocumentViewModel currentDocumentViewModel;
         private ObservableCollection<OpenDocumentViewModel> openDocuments;
         private ObservableCollection<DocumentViewModel>     documents;
-
+        
         private readonly RoslynEditorHost roslynHost = new RoslynEditorHost();
         public RoslynEditorHost RoslynHost
         {
             get { return roslynHost; }
         }
 
+        public ChartViewModel    ChartViewModel    { get; }
+        public DataGridViewModel DataGridViewModel { get; }
+
         public MainViewModel()
         {
             OpenDocuments = new ObservableCollection<OpenDocumentViewModel>();
             documents     = new ObservableCollection<DocumentViewModel>();
             documents.Add(new DocumentViewModel(@"C:\Users\Ivan\Documents\RoslynPad\Samples", true));
+
+            ChartViewModel    = new ChartViewModel();
+            DataGridViewModel = new DataGridViewModel();
+
+            LinqPadExtensions.Ploted += LinqPadExtensions_Ploted;
+            LinqPadExtensions.Tabled += LinqPadExtensions_Tabled;
             if (!IsOpenAnyDocuments)
                 CreateDocument();
+        }
+
+        private void LinqPadExtensions_Tabled(ResultTable<object> obj)
+        {
+            if(obj != null)
+            {
+                DataGridViewModel.AddTable(obj);
+            }
+        }
+
+        private void LinqPadExtensions_Ploted(PlotModel obj)
+        {
+            if (obj != null)
+            {
+                ChartViewModel.AddChart(obj);
+            }
         }
 
         public ObservableCollection<DocumentViewModel> Documents
@@ -52,6 +78,7 @@ namespace LinqPad.ViewModels
                 OnPropertyChanged(nameof(OpenDocuments));
             }
         }
+
 
         public string Title
         {

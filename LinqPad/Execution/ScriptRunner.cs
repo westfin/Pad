@@ -1,11 +1,16 @@
-﻿using Microsoft.CodeAnalysis.CSharp.Scripting;
+﻿using ICSharpCode.AvalonEdit;
+using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Threading;
 
 namespace LinqPad.Execution
 {
@@ -13,6 +18,10 @@ namespace LinqPad.Execution
     {
         private ScriptOptions scriptOptions =
             ScriptOptions.Default;
+
+        public event Action<IList<ResultObject>> Dumped;
+        private Dispatcher dispatcher;
+        private ConcurrentQueue<ResultObject> queue;
 
         private List<string> references;
         private List<string> imports;
@@ -23,20 +32,55 @@ namespace LinqPad.Execution
             scriptOptions = scriptOptions.
                 WithReferences(references).
                 WithImports(imports);
+            LinqPadExtensions.Dumped += LinqPadExtensions_Dumped;
+            queue = new ConcurrentQueue<ResultObject>();
+
+            using (var resetEvent = new ManualResetEventSlim(false))
+            {
+                var uiThread = new Thread(() =>
+                {
+                    dispatcher = Dispatcher.CurrentDispatcher;
+                    resetEvent.Set();
+                    Dispatcher.Run();
+                });
+                uiThread.SetApartmentState(ApartmentState.STA);
+                uiThread.IsBackground = true;
+                uiThread.Start();
+                resetEvent.Wait();
+            }
         }
 
-        public async Task ExecuteAsync(string code)
+        private void LinqPadExtensions_Dumped(object arg1, string arg2)
         {
-            try
+            queue.Enqueue(new ResultObject(arg1, arg2));
+        }
+
+        public async Task ExecuteAsync(string code, CancellationToken token)
+        {
+            var script = CSharpScript.Create(code).
+                WithOptions(scriptOptions);
+
+            await (await dispatcher.InvokeAsync(async () =>
             {
-                var script = CSharpScript.Create(code).
-                    WithOptions(scriptOptions);
-                await script.RunAsync().ConfigureAwait(false);
-            }
-            catch (CompilationErrorException e)
+                await script.RunAsync(cancellationToken: token).ConfigureAwait(false);
+                await DequeResultObjects(token).ConfigureAwait(false);
+            },
+            priority: DispatcherPriority.SystemIdle,
+            cancellationToken: token)).ConfigureAwait(false);
+        }
+
+        private Task DequeResultObjects(CancellationToken token)
+        {
+            return Task.Run(() =>
             {
-                MessageBox.Show(e.Message);
-            }
+                ResultObject item;
+                var list = new List<ResultObject>();
+                while (queue.TryDequeue(out item) && !token.IsCancellationRequested)
+                {
+                    list.Add(item);
+                }
+                Dumped?.Invoke(list);
+            });
         }
 
         public Task Initialize(IEnumerable<string> references, IEnumerable<string> imports)

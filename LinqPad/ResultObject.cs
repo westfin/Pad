@@ -12,8 +12,10 @@ namespace LinqPad
     {
         private string header;
         public  string Header => header;
+
         private object value;
         public  object Value => value;
+
         private string typeName;
         public string  TypeName => typeName;
 

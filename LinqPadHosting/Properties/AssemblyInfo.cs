@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // Управление общими сведениями о сборке осуществляется с помощью 
 // набора атрибутов. Измените значения этих атрибутов, чтобы изменить сведения,
 // связанные со сборкой.
-[assembly: AssemblyTitle("Hosting")]
+[assembly: AssemblyTitle("LinqPadHosting")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("Hosting")]
+[assembly: AssemblyProduct("LinqPadHosting")]
 [assembly: AssemblyCopyright("Copyright ©  2016")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // Следующий GUID служит для идентификации библиотеки типов, если этот проект будет видимым для COM
-[assembly: Guid("34143dfd-f8c5-4952-91a6-fc62f1a0d1e4")]
+[assembly: Guid("7ab7d5f7-0088-45a7-97f3-097b6760a5a4")]
 
 // Сведения о версии сборки состоят из следующих четырех значений:
 //

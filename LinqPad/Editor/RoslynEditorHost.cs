@@ -50,6 +50,8 @@ namespace LinqPad.Editor
             typeof(Path),
             typeof(Assembly),
             typeof(LinqPadExtensions),
+            typeof(OxyPlot.PlotModel),
+            typeof(OxyPlot.Series.Series)
         }.ToImmutableArray();
 
         private static readonly ImmutableArray<Assembly> defaultReferenceAssemblies =

@@ -12,6 +12,9 @@ using LinqPad.Execution;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows.Threading;
+using ICSharpCode.AvalonEdit.Rendering;
+using System.Threading;
+using LinqPadHosting;
 
 namespace LinqPad.ViewModels
 {
@@ -23,26 +26,36 @@ namespace LinqPad.ViewModels
         private readonly ScriptRunner scriptRunner;
         private bool isRunning = false;
         public  ObservableCollection<ResultObject> results;
-        public event PropertyChangedEventHandler PropertyChanged;
+        private Dispatcher dispatcher;
+        private CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
 
         public OpenDocumentViewModel(MainViewModel mainViewModel, DocumentViewModel document)
         {
+            this.dispatcher = Dispatcher.CurrentDispatcher;
             this.mainViewModel = mainViewModel;
             this.document = document;
-            this.RunCommand = new DelegateCommand(Run, ()=> !isRunning);
+
+            this.RunCommand     = new DelegateCommand(Run, ()=> !isRunning);
+            this.StopCommand    = new DelegateCommand(new Action(Stop));
+            this.RestartCommand = new DelegateCommand(Restart, () => !isRunning);
             this.scriptRunner = new ScriptRunner(
                 references: mainViewModel.RoslynHost.DefaultReferences.
-                    OfType<PortableExecutableReference>().
-                    Select(i=> i.FilePath),
-                imports:    mainViewModel.RoslynHost.DefaultImports);
+                    OfType<PortableExecutableReference>().Select(i=> i.FilePath),
+                imports: mainViewModel.RoslynHost.DefaultImports);
 
-            LinqPadExtensions.Dumped += LinqPadExtensions_Dumped;
+            scriptRunner.Dumped += ScriptRunner_Dumped; ;
             results = new ObservableCollection<ResultObject>();
         }
 
-        private void LinqPadExtensions_Dumped(object arg1, string arg2)
+        private void ScriptRunner_Dumped(IList<ResultObject> obj)
         {
-            results.Add(new ResultObject(value: arg1, header: arg2));
+            dispatcher.InvokeAsync(()=>
+            {
+                foreach (var item in obj)
+                {
+                    results.Add(item);
+                }
+            });
         }
 
         public DocumentViewModel Document           => document;
@@ -64,6 +77,8 @@ namespace LinqPad.ViewModels
 
         //Delegates commands
         public DelegateCommand RunCommand     { get; }
+        public DelegateCommand StopCommand    { get; }
+        public DelegateCommand RestartCommand { get; }
 
 
         public void Init(LinqPadSourceTextContainer container)
@@ -80,9 +95,29 @@ namespace LinqPad.ViewModels
         {
             IsRunning = true;
             results.Clear();
+            mainViewModel.ChartViewModel.ClearCharts();
+            mainViewModel.DataGridViewModel.ClearTables();
             var code = await GetTextCode().ConfigureAwait(true);
-            await scriptRunner.ExecuteAsync(code).ConfigureAwait(true);
+            //await scriptRunner.ExecuteAsync(code, cancellationTokenSource.Token).ConfigureAwait(true);
+            LinqPadHost host = new LinqPadHost();
+            await host.ExecuteAsync(code, cancellationTokenSource.Token);
             IsRunning = false;
+        }
+
+        private async Task Restart()
+        {
+            Stop();
+            await Run();
+        }
+
+        private void Stop()
+        {
+            if (cancellationTokenSource != null)
+            {
+                cancellationTokenSource.Cancel();
+                cancellationTokenSource.Dispose();
+            }
+            cancellationTokenSource = new CancellationTokenSource();
         }
 
         private async Task<string> GetTextCode()
@@ -116,5 +151,6 @@ namespace LinqPad.ViewModels
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propName));
         }
+        public event PropertyChangedEventHandler PropertyChanged;
     }
 }

@@ -9,9 +9,11 @@
         xmlns:models = "clr-namespace:LinqPad.ViewModels"
         xmlns:views = "clr-namespace:LinqPad.Views"
         xmlns:ed="http://icsharpcode.net/sharpdevelop/avalonedit"
+        xmlns:controls="clr-namespace:LinqPad.Controls"
+        xmlns:oxy="http://oxyplot.org/wpf"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance models:MainViewModel}"
-        Title="{Binding Title}" Height="350" Width="525">
+        Title="{Binding Title}" Height="500" Width="725">
 
     <FrameworkElement.Resources>
         <!-- OpenDocumentViewmodel template -->
@@ -47,6 +49,55 @@
                 </Style>
             </HierarchicalDataTemplate.ItemContainerStyle>
         </HierarchicalDataTemplate>
+        <!-- ChartViewModel -->
+        <DataTemplate DataType="{x:Type models:ChartViewModel}">
+            <DockPanel>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <ToolBar Grid.Row="0">
+                        <Button Command="{Binding PreviosCommand, Mode=OneTime}"
+                                Width="20"
+                                Height="20">
+                            <Image Source="{StaticResource ResourceKey=Backwards}"/>
+                        </Button>
+                        <Button Command="{Binding NextCommand, Mode=OneTime}"
+                                Width="20"
+                                Height="20">
+                            <Image Source="{StaticResource ResourceKey=Forwards}"/>
+                        </Button>
+                    </ToolBar>
+                    <oxy:PlotView Grid.Row="1" Model="{Binding CurrentPlotModel}" />
+                </Grid>
+            </DockPanel>
+        </DataTemplate>
+
+        <!--DataGridViewModel-->
+        <DataTemplate DataType="{x:Type models:DataGridViewModel}">
+            <DockPanel>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <ToolBar Background="Transparent" Grid.Row="0">
+                        <Button Command="{Binding PreviosCommand}" Width="20" Height="20">
+                            <Image Source="{StaticResource ResourceKey=Backwards}"/>
+                        </Button>
+                        <Button Command="{Binding NextCommand}" Width="20" Height="20">
+                            <Image Source="{StaticResource ResourceKey=Forwards}"/>
+                        </Button>
+                    </ToolBar>
+                    <TextBlock Grid.Row="1" Text="{Binding CurrentTable.Title}"/>
+                    <DataGrid Grid.Row="2" ItemsSource="{Binding CurrentTable.ItemsSource}">
+                        
+                    </DataGrid>
+                </Grid>
+            </DockPanel>
+        </DataTemplate>
 
     </FrameworkElement.Resources>
     <Grid>
@@ -69,6 +120,29 @@
                         </adoc:LayoutAnchorable>
                     </adoc:LayoutAnchorablePane>
                     <adoc:LayoutDocumentPane/>
+                    <adoc:LayoutAnchorablePane DockWidth="200">
+                        <adoc:LayoutAnchorable
+                            CanFloat="False"
+                            CanHide="False"
+                            CanClose="False"
+                            Title="Visualizations">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition />
+                                    <RowDefinition Height="4"/>
+                                    <RowDefinition />
+                                </Grid.RowDefinitions>
+                                <GridSplitter Grid.Row="1"
+                                              ResizeDirection="Rows"
+                                              VerticalAlignment="Stretch"
+                                              HorizontalAlignment="Stretch"
+                                              ResizeBehavior="PreviousAndNext"
+                                              Background="DarkGray"/>
+                                <ContentControl Grid.Row="0" Content="{Binding ChartViewModel}"/>
+                                <ContentControl Grid.Row="2" Content="{Binding DataGridViewModel}"/>
+                            </Grid>
+                        </adoc:LayoutAnchorable>
+                    </adoc:LayoutAnchorablePane>
                 </adoc:LayoutPanel>
             </adoc:LayoutRoot>
         </adoc:DockingManager>

@@ -12,9 +12,15 @@ namespace LinqPad.ViewModels
     public sealed class DocumentViewModel
     {
         private static readonly string fileExtension = ".csx";
+        private ObservableCollection<DocumentViewModel> children;
         public ObservableCollection<DocumentViewModel> Childrens
         {
-            get { return GetChildrens(); }
+            get
+            {
+                if (children == null && IsFolder)
+                    children = GetChildrens();
+                return children;
+            }
         }
 
         public string Name

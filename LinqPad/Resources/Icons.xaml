@@ -87,6 +87,21 @@
         </DrawingImage.Drawing>
     </DrawingImage>
 
+    <DrawingImage x:Key="Stop">
+        <DrawingImage.Drawing>
+            <DrawingGroup>
+                <DrawingGroup.Children>
+                    <GeometryDrawing Brush="#00FFFFFF"
+                                     Geometry="F1 M16,16z M0,0z M16,16L0,16 0,0 16,0 16,16z" />
+                    <GeometryDrawing Brush="#FFF6F6F6"
+                                     Geometry="F1 M16,16z M0,0z M13,13L3,13 3,3 13,3 13,13z" />
+                    <GeometryDrawing Brush="#FFA1250C"
+                                     Geometry="F1 M16,16z M0,0z M12,12L4,12 4,4 12,4 12,12z" />
+                </DrawingGroup.Children>
+            </DrawingGroup>
+        </DrawingImage.Drawing>
+    </DrawingImage>
+
     <DrawingImage x:Key="Folder">
         <DrawingImage.Drawing>
             <DrawingGroup>
@@ -189,6 +204,32 @@
                     <GeometryDrawing Brush="#FF00529C"
                                      Geometry="F1M5,5L2,5 3.5,7z M3.5,2L5,4 2,4z" />
                 </DrawingGroup.Children>
+            </DrawingGroup>
+        </DrawingImage.Drawing>
+    </DrawingImage>
+
+    <DrawingImage x:Key="Backwards">
+        <DrawingImage.Drawing>
+            <DrawingGroup ClipGeometry="M0,0 V175 H175 V0 H0 Z">
+                <DrawingGroup Transform="0.1,0,0,-0.1,0,175">
+                    <GeometryDrawing Brush="Transparent"
+                                     Geometry="F1 M175,175z M0,0z M0,875L0,0 875,0 1750,0 1750,875 1750,1750 875,1750 0,1750 0,875z M1112,1608C1362,1526 1556,1320 1621,1065 1663,900 1643,697 1569,540 1390,157 910,-4 525,190 346,280 207,442 142,638 118,708 116,730 116,875 116,1022 118,1042 143,1115 227,1367 446,1566 705,1626 803,1648 1016,1639 1112,1608z" />
+                    <GeometryDrawing Brush="DarkBlue"
+                                     Geometry="F1 M175,175z M0,0z M745,1514C707,1505 637,1480 590,1458 522,1425 489,1401 419,1331 349,1261 325,1228 292,1160 250,1072 220,954 220,875 220,796 250,678 292,590 349,470 469,351 590,291 780,198 970,197 1155,289 1295,359 1391,454 1461,595 1553,780 1552,970 1459,1160 1399,1281 1280,1401 1160,1458 1018,1526 887,1543 745,1514z M980,1202C980,1198,935,1150,880,1095L780,995 1047,990 1315,985 1315,875 1315,765 1047,760 780,755 880,655C935,600 980,552 980,548 980,543 932,540 873,540L765,540 603,702C513,792 440,870 440,875 440,881 513,959 603,1048L766,1210 873,1210C932,1210,980,1207,980,1202z" />
+                </DrawingGroup>
+            </DrawingGroup>
+        </DrawingImage.Drawing>
+    </DrawingImage>
+
+    <DrawingImage x:Key="Forwards">
+        <DrawingImage.Drawing>
+            <DrawingGroup ClipGeometry="M0,0 V175 H175 V0 H0 Z">
+                <DrawingGroup Transform="0.1,0,0,-0.1,0,175">
+                    <GeometryDrawing Brush="Transparent"
+                                     Geometry="F1 M175,175z M0,0z M0,875L0,0 875,0 1750,0 1750,875 1750,1750 875,1750 0,1750 0,875z M1112,1608C1362,1526 1556,1320 1621,1065 1663,900 1643,697 1569,540 1390,157 910,-4 525,190 346,280 207,442 142,638 118,708 116,730 116,875 116,1022 118,1042 143,1115 227,1367 446,1566 705,1626 803,1648 1016,1639 1112,1608z" />
+                    <GeometryDrawing Brush="DarkBlue"
+                                     Geometry="F1 M175,175z M0,0z M745,1514C707,1505 637,1480 590,1458 522,1425 489,1401 419,1331 349,1261 325,1228 292,1160 250,1072 220,954 220,875 220,796 250,678 292,590 349,470 469,351 590,291 780,198 970,197 1155,289 1295,359 1391,454 1461,595 1553,780 1552,970 1459,1160 1399,1281 1280,1401 1160,1458 1018,1526 887,1543 745,1514z M1147,1048C1237,959 1310,881 1310,875 1310,870 1237,792 1147,702L985,540 877,540C818,540 770,543 770,548 770,552 815,600 870,655L970,755 703,760 435,765 435,875 435,985 703,990 970,995 870,1095C815,1150 770,1198 770,1202 770,1207 818,1210 877,1210L984,1210 1147,1048z" />
+                </DrawingGroup>
             </DrawingGroup>
         </DrawingImage.Drawing>
     </DrawingImage>
