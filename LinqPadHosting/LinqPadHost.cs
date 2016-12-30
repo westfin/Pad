@@ -21,7 +21,15 @@ namespace LinqPadHosting
         private ScriptOptions scriptOptions =
             ScriptOptions.Default;
 
-        private ILinqPadservice service;
+        private List<string> imports;
+        private List<string> references;
+        private ILinqPadService service;
+
+        public LinqPadHost(IEnumerable<string> imports, IEnumerable<string> references)
+        {
+            this.imports = imports.ToList();
+            this.references = references.ToList();
+        }
 
         public static void RunHost(string serverPort, int processId)
         {
@@ -36,7 +44,7 @@ namespace LinqPadHosting
                 var binding = CreateBinding();
                 var address = CreateUri(serverPort);
 
-                serviceHost.AddServiceEndpoint(typeof(ILinqPadservice), binding, address);
+                serviceHost.AddServiceEndpoint(typeof(ILinqPadService), binding, address);
                 serviceHost.Open();
 
                 clientExited.Wait();
@@ -59,7 +67,7 @@ namespace LinqPadHosting
             await service.ExecuteAsync(code);
         }
 
-        private ILinqPadservice StartProcess(CancellationToken cancellationToken)
+        private ILinqPadService StartProcess(CancellationToken cancellationToken)
         {
             Process process = null;
             try
@@ -84,7 +92,8 @@ namespace LinqPadHosting
 
                 var binding = CreateBinding();
                 var address = CreateUri(serverPort);
-                service = ChannelFactory<ILinqPadservice>.CreateChannel(binding, new EndpointAddress(address));
+                service = ChannelFactory<ILinqPadService>.CreateChannel(binding, new EndpointAddress(address));
+                service.Initialize(imports, references);
                 return service;
             }
             finally
@@ -135,24 +144,33 @@ namespace LinqPadHosting
     }
     
     [ServiceContract]
-    public interface ILinqPadservice
+    public interface ILinqPadService
     {
         [OperationContract]
         Task ExecuteAsync(string code);
+        [OperationContract]
+        Task Initialize(IEnumerable<string> imports, IEnumerable<string> references);
     }
 
     [ServiceBehavior(IncludeExceptionDetailInFaults = true)]
-    public sealed class LinqPadService : ILinqPadservice
+    public sealed class LinqPadService : ILinqPadService
     {
-        private ScriptOptions options = ScriptOptions.Default;
-
-        private List<string> imports;
-        private List<string> references;
+        private ScriptOptions scriptOptions = ScriptOptions.Default;
 
         public async Task ExecuteAsync(string code)
         {
-            var script = CSharpScript.Create(code);
+            var script = CSharpScript.Create(code).
+                WithOptions(scriptOptions);
             await script.RunAsync();
+        }
+
+        public Task Initialize(IEnumerable<string> imports, IEnumerable<string> references)
+        {
+            scriptOptions = scriptOptions.
+                WithImports(imports).
+                WithReferences(references);
+
+            return Task.CompletedTask;
         }
     }
 }

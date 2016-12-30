@@ -10,28 +10,28 @@ using System.Threading.Tasks;
 
 namespace LinqPad.ViewModels
 {
-    public sealed class MainViewModel : INotifyPropertyChanged
+    public sealed class MainViewModel
     {
         private OpenDocumentViewModel currentDocumentViewModel;
         private ObservableCollection<OpenDocumentViewModel> openDocuments;
-        private ObservableCollection<DocumentViewModel>     documents;
-        
+        private ObservableCollection<DocumentViewModel> documents;
+
         private readonly RoslynEditorHost roslynHost = new RoslynEditorHost();
         public RoslynEditorHost RoslynHost
         {
             get { return roslynHost; }
         }
 
-        public ChartViewModel    ChartViewModel    { get; }
+        public ChartViewModel ChartViewModel { get; }
         public DataGridViewModel DataGridViewModel { get; }
 
         public MainViewModel()
         {
             OpenDocuments = new ObservableCollection<OpenDocumentViewModel>();
-            documents     = new ObservableCollection<DocumentViewModel>();
+            documents = new ObservableCollection<DocumentViewModel>();
             documents.Add(new DocumentViewModel(@"C:\Users\Ivan\Documents\RoslynPad\Samples", true));
 
-            ChartViewModel    = new ChartViewModel();
+            ChartViewModel = new ChartViewModel();
             DataGridViewModel = new DataGridViewModel();
 
             LinqPadExtensions.Ploted += LinqPadExtensions_Ploted;
@@ -42,7 +42,7 @@ namespace LinqPad.ViewModels
 
         private void LinqPadExtensions_Tabled(ResultTable<object> obj)
         {
-            if(obj != null)
+            if (obj != null)
             {
                 DataGridViewModel.AddTable(obj);
             }

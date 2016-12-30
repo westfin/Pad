@@ -1,0 +1,51 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="LinqPad.ViewModels.MainViewModel">
+    <Position X="3" Y="0.5" Width="2.75" />
+    <TypeIdentifier>
+      <HashCode>AgABIgAACAQAAEAAIAAAAAAAkAYAAAASAAAIAAAAiCA=</HashCode>
+      <FileName>ViewModels\MainViewModel.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="ChartViewModel" />
+      <Property Name="DataGridViewModel" />
+      <Property Name="CurrentDocumentViewModel" />
+    </ShowAsAssociation>
+    <ShowAsCollectionAssociation>
+      <Property Name="Documents" />
+      <Property Name="OpenDocuments" />
+    </ShowAsCollectionAssociation>
+  </Class>
+  <Class Name="LinqPad.ViewModels.ChartViewModel" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="8" Y="4" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AgAgCAAAgAAAAIAEAECAAQBAgAAAAAAAQAAAAAAAIAA=</HashCode>
+      <FileName>ViewModels\ChartViewModel.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.213" Collapsed="true" />
+  </Class>
+  <Class Name="LinqPad.ViewModels.DataGridViewModel" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="8" Y="3" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AgAAAAAAACAAAIAgAEiAQAAAgAAAACAAQAAAAAAAAAA=</HashCode>
+      <FileName>ViewModels\DataGridViewModel.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="LinqPad.ViewModels.DocumentViewModel" Collapsed="true">
+    <Position X="8" Y="1" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAYAAAAEAAQABAAAQQAAAAAAAAAAAAA=</HashCode>
+      <FileName>ViewModels\DocumentViewModel.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="LinqPad.ViewModels.OpenDocumentViewModel" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="8" Y="2" Width="2.75" />
+    <TypeIdentifier>
+      <HashCode>GAAAgAgAIACAAEBAIACAQKAAiAIAgAgCIDgCAACAAAI=</HashCode>
+      <FileName>ViewModels\OpenDocumentViewModel.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

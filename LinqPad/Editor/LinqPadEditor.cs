@@ -11,6 +11,7 @@ using ICSharpCode.AvalonEdit.CodeCompletion;
 using ICSharpCode.AvalonEdit.Editing;
 using System.Diagnostics;
 using System.Windows.Controls;
+using ICSharpCode.AvalonEdit.Search;
 
 namespace LinqPad.Editor
 {
@@ -67,6 +68,7 @@ namespace LinqPad.Editor
 
         public LinqPadEditor() : base()
         {
+            SearchPanel.Install(this);
             Options = new TextEditorOptions()
             {
                 CutCopyWholeLine = true,
@@ -158,13 +160,7 @@ namespace LinqPad.Editor
 
         private void TextArea_TextEntering(object sender, TextCompositionEventArgs e)
         {
-            //if (e.Text.Length > 0 && completionWindow != null)
-            //{
-            //    if (!char.IsLetterOrDigit(e.Text[0]))
-            //    {
-            //        completionWindow.CompletionList.RequestInsertion(e);
-            //    }
-            //}
+
         }
 
         private void TextArea_TextEntered(object sender, TextCompositionEventArgs e)

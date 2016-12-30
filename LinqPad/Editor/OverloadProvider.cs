@@ -91,7 +91,7 @@ namespace LinqPad.Editor
             var counter = new TextBlock();
             if (signature.SignatureHelpItems.Count > 1)
             {
-                counter.Text = $"({selectedIndex + 1}:{signature.SignatureHelpItems.Count}) ";
+                counter.Text = $"{selectedIndex + 1} of {signature.SignatureHelpItems.Count} ";
                 counter.FontWeight = FontWeights.Bold;
             }
             var headerPanel = new WrapPanel()
@@ -115,7 +115,7 @@ namespace LinqPad.Editor
                 Children = { new TextBlock() { Text = item.Documentation } }
             };
 
-            if(selectedIndex <= item.Parametrs.Count() && selectedIndex > 0)
+            if(signature.ActiveParameter < item.Parametrs.Count() && selectedIndex > 0)
             {
                 var param = item.Parametrs.ToArray()[signature.ActiveParameter];
                 if (signature.ActiveParameter < item.Parametrs.Count())

@@ -24,6 +24,7 @@ namespace LinqPad.ViewModels
         private MainViewModel         mainViewModel;
         private DocumentId            documentId;
         private readonly ScriptRunner scriptRunner;
+        private readonly LinqPadHost linqPadHost;
         private bool isRunning = false;
         public  ObservableCollection<ResultObject> results;
         private Dispatcher dispatcher;
@@ -41,6 +42,11 @@ namespace LinqPad.ViewModels
             this.scriptRunner = new ScriptRunner(
                 references: mainViewModel.RoslynHost.DefaultReferences.
                     OfType<PortableExecutableReference>().Select(i=> i.FilePath),
+                imports: mainViewModel.RoslynHost.DefaultImports);
+
+            linqPadHost = new LinqPadHost(
+                references: mainViewModel.RoslynHost.DefaultReferences.
+                    OfType<PortableExecutableReference>().Select(i => i.FilePath),
                 imports: mainViewModel.RoslynHost.DefaultImports);
 
             scriptRunner.Dumped += ScriptRunner_Dumped; ;
@@ -98,9 +104,8 @@ namespace LinqPad.ViewModels
             mainViewModel.ChartViewModel.ClearCharts();
             mainViewModel.DataGridViewModel.ClearTables();
             var code = await GetTextCode().ConfigureAwait(true);
-            //await scriptRunner.ExecuteAsync(code, cancellationTokenSource.Token).ConfigureAwait(true);
-            LinqPadHost host = new LinqPadHost();
-            await host.ExecuteAsync(code, cancellationTokenSource.Token);
+            await scriptRunner.ExecuteAsync(code, cancellationTokenSource.Token).ConfigureAwait(true);
+            //await linqPadHost.ExecuteAsync(code, cancellationTokenSource.Token);
             IsRunning = false;
         }
 

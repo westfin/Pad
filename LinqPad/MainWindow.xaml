@@ -11,6 +11,7 @@
         xmlns:ed="http://icsharpcode.net/sharpdevelop/avalonedit"
         xmlns:controls="clr-namespace:LinqPad.Controls"
         xmlns:oxy="http://oxyplot.org/wpf"
+        xmlns:themes="clr-namespace:AvalonDock.Themes.VS2013;assembly=AvalonDock.Themes.VS2013"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance models:MainViewModel}"
         Title="{Binding Title}" Height="500" Width="725">
@@ -93,7 +94,7 @@
                     </ToolBar>
                     <TextBlock Grid.Row="1" Text="{Binding CurrentTable.Title}"/>
                     <DataGrid Grid.Row="2" ItemsSource="{Binding CurrentTable.ItemsSource}">
-                        
+
                     </DataGrid>
                 </Grid>
             </DockPanel>
@@ -104,6 +105,10 @@
         <adoc:DockingManager x:Name="dockingManager"
                              ActiveContent=  "{Binding CurrentDocumentViewModel}"
                              DocumentsSource="{Binding OpenDocuments, Mode=OneWay}">
+
+            <adoc:DockingManager.Theme>
+                <themes:Vs2013BlueTheme/>
+            </adoc:DockingManager.Theme>
             <adoc:DockingManager.DocumentHeaderTemplate>
                 <DataTemplate>
                     <TextBlock Text="{Binding Content.Title}"/>
@@ -120,29 +125,17 @@
                         </adoc:LayoutAnchorable>
                     </adoc:LayoutAnchorablePane>
                     <adoc:LayoutDocumentPane/>
-                    <adoc:LayoutAnchorablePane DockWidth="200">
-                        <adoc:LayoutAnchorable
-                            CanFloat="False"
-                            CanHide="False"
-                            CanClose="False"
-                            Title="Visualizations">
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition />
-                                    <RowDefinition Height="4"/>
-                                    <RowDefinition />
-                                </Grid.RowDefinitions>
-                                <GridSplitter Grid.Row="1"
-                                              ResizeDirection="Rows"
-                                              VerticalAlignment="Stretch"
-                                              HorizontalAlignment="Stretch"
-                                              ResizeBehavior="PreviousAndNext"
-                                              Background="DarkGray"/>
+                    <adoc:LayoutAnchorablePaneGroup Orientation="Horizontal" DockWidth="200">
+                        <adoc:LayoutAnchorablePane DockWidth="200">
+                            <adoc:LayoutAnchorable Title="Charts">
                                 <ContentControl Grid.Row="0" Content="{Binding ChartViewModel}"/>
+                            </adoc:LayoutAnchorable>
+                            <adoc:LayoutAnchorable Title="Tables">
                                 <ContentControl Grid.Row="2" Content="{Binding DataGridViewModel}"/>
-                            </Grid>
-                        </adoc:LayoutAnchorable>
-                    </adoc:LayoutAnchorablePane>
+                            </adoc:LayoutAnchorable>
+                            <adoc:LayoutAnchorable Title="Workspace"/>
+                        </adoc:LayoutAnchorablePane>
+                    </adoc:LayoutAnchorablePaneGroup>
                 </adoc:LayoutPanel>
             </adoc:LayoutRoot>
         </adoc:DockingManager>
