@@ -107,7 +107,7 @@
                              DocumentsSource="{Binding OpenDocuments, Mode=OneWay}">
 
             <adoc:DockingManager.Theme>
-                <themes:Vs2013BlueTheme/>
+                <themes:Vs2013LightTheme/>
             </adoc:DockingManager.Theme>
             <adoc:DockingManager.DocumentHeaderTemplate>
                 <DataTemplate>

@@ -59,7 +59,7 @@
             <editor:LinqPadEditor Grid.Row="2"
                 x:Name="editor"
                 SyntaxHighlighting="C#"
-                FontFamily="Consalas"
+                FontFamily="Consolas"
                 FontSize="10pt"/>
             <GridSplitter Grid.Row="3"
                           Grid.Column="0"

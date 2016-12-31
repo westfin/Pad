@@ -12,6 +12,9 @@ using ICSharpCode.AvalonEdit.Editing;
 using System.Diagnostics;
 using System.Windows.Controls;
 using ICSharpCode.AvalonEdit.Search;
+using ICSharpCode.AvalonEdit.Folding;
+using System.Windows.Threading;
+using ICSharpCode.AvalonEdit.Highlighting;
 
 namespace LinqPad.Editor
 {
@@ -71,6 +74,7 @@ namespace LinqPad.Editor
             SearchPanel.Install(this);
             Options = new TextEditorOptions()
             {
+                AllowScrollBelowDocument = true,
                 CutCopyWholeLine = true,
                 ConvertTabsToSpaces = true,
                 HighlightCurrentLine = true,

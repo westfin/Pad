@@ -29,7 +29,7 @@ namespace LinqPad.ViewModels
         {
             OpenDocuments = new ObservableCollection<OpenDocumentViewModel>();
             documents = new ObservableCollection<DocumentViewModel>();
-            documents.Add(new DocumentViewModel(@"C:\Users\Ivan\Documents\RoslynPad\Samples", true));
+            //documents.Add(new DocumentViewModel(@"C:\Users\Ivan\Documents\RoslynPad\Samples", true));
 
             ChartViewModel = new ChartViewModel();
             DataGridViewModel = new DataGridViewModel();
