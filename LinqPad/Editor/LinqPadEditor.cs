@@ -1,78 +1,47 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Media;
+using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Threading;
+
 using ICSharpCode.AvalonEdit;
 using ICSharpCode.AvalonEdit.CodeCompletion;
 using ICSharpCode.AvalonEdit.Editing;
-using System.Diagnostics;
-using System.Windows.Controls;
-using ICSharpCode.AvalonEdit.Search;
 using ICSharpCode.AvalonEdit.Folding;
-using System.Windows.Threading;
 using ICSharpCode.AvalonEdit.Highlighting;
+using ICSharpCode.AvalonEdit.Search;
 
 namespace LinqPad.Editor
 {
     public sealed class LinqPadEditor : TextEditor
     {
-        private LinqPadCompletionWindow completionWindow;
-        private OverloadInsightWindow   insightWindow;
-        private IntellisenseProvider    intellisenseProvider;
-        private SignatureHelpService    signatureHelpService;
-        private ToolTip toolTip;
-        public Action<ToolTipArgs> ToolTipRequest { get; set; }
-
-
         public static readonly DependencyProperty CompletionBackgroundProperty = 
             DependencyProperty.Register(
-            "CompletionBackground", typeof(Brush),
-            typeof(LinqPadEditor),
-            new FrameworkPropertyMetadata(CreateDefaultCompletionBackground()));
+                "CompletionBackground",
+                typeof(Brush),
+                typeof(LinqPadEditor),
+                new FrameworkPropertyMetadata(CreateDefaultCompletionBackground()));
 
-        private static SolidColorBrush CreateDefaultCompletionBackground()
-        {
-            var defaultCompletionBackground = new SolidColorBrush(Color.FromRgb(240, 240, 240));
-            defaultCompletionBackground.Freeze();
-            return defaultCompletionBackground;
-        }
+        private LinqPadCompletionWindow completionWindow;
 
-        public Brush CompletionBackground
-        {
-            get { return (Brush)GetValue(CompletionBackgroundProperty); }
-            set { SetValue(CompletionBackgroundProperty, value); }
-        }
+        private OverloadInsightWindow insightWindow;
 
-        public SignatureHelpService SignatureHelpService
-        {
-            get { return signatureHelpService; }
-            set
-            {
-                if (signatureHelpService == value)
-                    return;
-                signatureHelpService = value;
-            }
-        }
+        private IntellisenseProvider intellisenseProvider;
 
-        public IntellisenseProvider IntellisenseProvider
-        {
-            get { return intellisenseProvider; }
-            set
-            {
-                if (intellisenseProvider == value)
-                    return;
-                intellisenseProvider = value;
-            }
-        }
+        private SignatureHelpService signatureHelpService;
+
+        private ToolTip toolTip;
 
         public LinqPadEditor() : base()
         {
             SearchPanel.Install(this);
-            Options = new TextEditorOptions()
+            this.Options = new TextEditorOptions()
             {
                 AllowScrollBelowDocument = true,
                 CutCopyWholeLine = true,
@@ -81,48 +50,115 @@ namespace LinqPad.Editor
                 IndentationSize = 4,
                 EnableEmailHyperlinks = true
             };
-            ShowLineNumbers = true;
-            Attach();
+            this.ShowLineNumbers = true;
+            this.Attach();
         }
 
-        private void LinqPadEditor_MouseHover(object sender, MouseEventArgs e)
+        public Action<ToolTipArgs> ToolTipRequest { get; set; }
+
+        public Brush CompletionBackground
+        {
+            get { return (Brush)this.GetValue(CompletionBackgroundProperty); }
+            set { this.SetValue(CompletionBackgroundProperty, value); }
+        }
+
+        public SignatureHelpService SignatureHelpService
+        {
+            get
+            {
+                return this.signatureHelpService;
+            }
+
+            set
+            {
+                if (this.signatureHelpService == value)
+                {
+                    return;
+                }
+
+                this.signatureHelpService = value;
+            }
+        }
+
+        public IntellisenseProvider IntellisenseProvider
+        {
+            get
+            {
+                return this.intellisenseProvider;
+            }
+
+            set
+            {
+                if (this.intellisenseProvider == value)
+                {
+                    return;
+                }
+
+                this.intellisenseProvider = value;
+            }
+        }
+
+        protected override void OnKeyDown(KeyEventArgs e)
+        {
+            base.OnKeyDown(e);
+            if (e.Key == Key.Space && e.KeyboardDevice.Modifiers.HasFlag(ModifierKeys.Control))
+            {
+                this.ShowCompletion().ConfigureAwait(true);
+                e.Handled = true;
+            }
+        }
+
+        private static SolidColorBrush CreateDefaultCompletionBackground()
+        {
+            var defaultCompletionBackground = new SolidColorBrush(Color.FromRgb(240, 240, 240));
+            defaultCompletionBackground.Freeze();
+            return defaultCompletionBackground;
+        }
+
+        private void LinqPadEditorMouseHover(object sender, MouseEventArgs e)
         {
             TextViewPosition? position;
             try
             {
-                position = TextArea.TextView.GetPositionFloor(e.GetPosition(TextArea.TextView) + TextArea.TextView.ScrollOffset);
+                position = this.TextArea.TextView.GetPositionFloor(e.GetPosition(this.TextArea.TextView) + this.TextArea.TextView.ScrollOffset);
             }
             catch (ArgumentOutOfRangeException)
             {
                 e.Handled = true;
                 return;
             }
+
             var args = new ToolTipArgs() { InDocument = position.HasValue };
 
             if (!position.HasValue || position.Value.Location.IsEmpty)
             {
                 return;
             }
+
             args.LogicalPosition = position.Value.Location;
-            args.Position = Document.GetOffset(position.Value.Line, position.Value.Column);
+            args.Position = this.Document.GetOffset(position.Value.Line, position.Value.Column);
 
-            if (ToolTipRequest == null)
-                return;
-
-            ToolTipRequest.Invoke(args);
-            if (args.ContentToShow == null)
-                return;
-
-            if(toolTip == null)
+            if (this.ToolTipRequest == null)
             {
-                toolTip = new ToolTip { MaxWidth = 400 };
-                toolTip.Closed += delegate { toolTip = null; };
+                return;
+            }
+
+            this.ToolTipRequest.Invoke(args);
+            if (args.ContentToShow == null)
+            {
+                return;
+            }
+
+            if (this.toolTip == null)
+            {
+                this.toolTip = new ToolTip { MaxWidth = 400 };
+                this.toolTip.Closed += delegate { this.toolTip = null; };
             }
 
             var stringContent = args.ContentToShow as string;
             if (stringContent != null)
             {
-                toolTip.Content = new TextBlock
+                this.toolTip.Content = new TextBlock
                 {
                     Text = stringContent,
                     TextWrapping = TextWrapping.Wrap
@@ -130,112 +166,112 @@ namespace LinqPad.Editor
             }
             else
             {
-                toolTip.Content = args.ContentToShow;
+                this.toolTip.Content = args.ContentToShow;
             }
 
             e.Handled = true;
-            toolTip.IsOpen = true;
+            this.toolTip.IsOpen = true;
         }
 
         private void OnVisualLinesChanged(object sender, EventArgs e)
         {
-            if (toolTip != null)
+            if (this.toolTip != null)
             {
-                toolTip.IsOpen = false;
+                this.toolTip.IsOpen = false;
             }
         }
 
         private void OnMouseHoverStopped(object sender, MouseEventArgs e)
         {
-            if (toolTip != null)
+            if (this.toolTip == null)
             {
-                toolTip.IsOpen = false;
-                e.Handled = true;
+                return;
             }
+
+            this.toolTip.IsOpen = false;
+            e.Handled = true;
         }
 
         private void Attach()
         {
-            TextArea.TextEntered  += TextArea_TextEntered;
-            TextArea.TextEntering += TextArea_TextEntering;
-            MouseHover            += LinqPadEditor_MouseHover;
-            MouseHoverStopped     += OnMouseHoverStopped;
+            this.TextArea.TextEntered  += this.TextAreaTextEntered;
+            this.TextArea.TextEntering += this.TextAreaTextEntering;
+            this.MouseHover            += this.LinqPadEditorMouseHover;
+            this.MouseHoverStopped     += this.OnMouseHoverStopped;
         }
 
-        private void TextArea_TextEntering(object sender, TextCompositionEventArgs e)
+        private void TextAreaTextEntering(object sender, TextCompositionEventArgs e)
         {
-
         }
 
-        private void TextArea_TextEntered(object sender, TextCompositionEventArgs e)
+        private void TextAreaTextEntered(object sender, TextCompositionEventArgs e)
         {
-            ShowCompletion().ConfigureAwait(true);
-        }
-
-        protected override void OnKeyDown(KeyEventArgs e)
-        {
-            base.OnKeyDown(e);
-            if(e.Key == Key.Space && e.KeyboardDevice.Modifiers.HasFlag(ModifierKeys.Control))
-            {
-                ShowCompletion().ConfigureAwait(true);
-                e.Handled = true;
-            }
+            this.ShowCompletion().ConfigureAwait(true);
         }
 
         private async Task ShowCompletion()
         {
-            var help = await signatureHelpService.GetSignatureHelp(CaretOffset);
+            var help = await this.signatureHelpService.GetSignatureHelp(this.CaretOffset);
             if (help != null)
             {
                 var provider = new OverloadProvider(help);
-                if (insightWindow == null)
+                if (this.insightWindow == null)
                 {
-                    insightWindow = new OverloadInsightWindow(TextArea);
-                    insightWindow.Closed += delegate { insightWindow = null; };
-                    insightWindow.Background = CompletionBackground;
-                    insightWindow.Style = TryFindResource(typeof(InsightWindow)) as Style;
+                    this.insightWindow = new OverloadInsightWindow(this.TextArea);
+                    this.insightWindow.Closed += delegate { this.insightWindow = null; };
+                    this.insightWindow.Background = this.CompletionBackground;
+                    this.insightWindow.Style = this.TryFindResource(typeof(InsightWindow)) as Style;
                 }
-                insightWindow.Provider = provider;
-                insightWindow.Show();
+
+                this.insightWindow.Provider = provider;
+                this.insightWindow.Show();
                 return;
             }
 
-            insightWindow?.Close();
-            var results = await intellisenseProvider.
-                GetCompletioData(CaretOffset, Document.GetCharAt(CaretOffset - 1)).
-                ConfigureAwait(true);
+            this.insightWindow?.Close();
+            var results = await this.intellisenseProvider.GetCompletioData(
+                this.CaretOffset,
+                this.Document.GetCharAt(this.CaretOffset - 1)).ConfigureAwait(true);
 
-            if (results?.Any() == true && completionWindow == null)
+            if (results?.Any() == true && this.completionWindow == null)
             {
-                completionWindow = new LinqPadCompletionWindow(TextArea)
+                this.completionWindow = new LinqPadCompletionWindow(this.TextArea)
                 {
-                    Background = CompletionBackground,
+                    Background = this.CompletionBackground,
                     CloseWhenCaretAtBeginning = false,
                 };
-                completionWindow.CompletionList.IsFiltering = true;
-                var data = completionWindow.CompletionList.CompletionData;
+
+                this.completionWindow.CompletionList.IsFiltering = true;
+                var data = this.completionWindow.CompletionList.CompletionData;
                 foreach (var item in results)
                 {
                     data.Add(item);
                 }
-                completionWindow.Show();
-                completionWindow.Closed += delegate
+
+                this.completionWindow.Show();
+                this.completionWindow.Closed += delegate
                 {
-                    completionWindow = null;
+                    this.completionWindow = null;
                 };
             }
         }
 
         private sealed class LinqPadCompletionWindow : CompletionWindow
         {
-            public LinqPadCompletionWindow(TextArea textarea) : base(textarea) { }
             static LinqPadCompletionWindow()
             {
-                WindowStyleProperty.OverrideMetadata(typeof(LinqPadCompletionWindow),
+                WindowStyleProperty.OverrideMetadata(
+                    typeof(LinqPadCompletionWindow),
                     new FrameworkPropertyMetadata(WindowStyle.None));
 
-                AllowsTransparencyProperty.OverrideMetadata(typeof(LinqPadCompletionWindow),
+                AllowsTransparencyProperty.OverrideMetadata(
+                    typeof(LinqPadCompletionWindow),
                     new FrameworkPropertyMetadata(true));
+            }
+
+            public LinqPadCompletionWindow(TextArea textarea)
+                : base(textarea)
+            {
             }
         }
     }

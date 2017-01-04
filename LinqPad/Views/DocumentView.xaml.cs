@@ -1,13 +1,14 @@
-﻿using System.Linq;
-using LinqPad.Editor;
-using LinqPad.ViewModels;
-using System;
+﻿using System;
+using System.Linq;
+using System.Threading.Tasks;
+
 using System.Windows;
 using System.Windows.Media;
+
+using LinqPad.Editor;
+using LinqPad.ViewModels;
+
 using Microsoft.CodeAnalysis;
-using System.Threading.Tasks;
-using System.IO;
-using System.Threading;
 
 namespace LinqPad.Views
 {
@@ -16,60 +17,63 @@ namespace LinqPad.Views
     /// </summary>
     public partial class DocumentView 
     {
-        private OpenDocumentViewModel  viewModel;
-        private DiagnosticsService     diagnosticService;
+        private OpenDocumentViewModel viewModel;
+
+        private DiagnosticsService diagnosticService;
+
         private LnqPadColorizerService colorizerService;
-        private ReferencesProvider     referencesProvider;
+
+        private ReferencesProvider referencesProvider;
 
         public DocumentView()
         {
-            InitializeComponent();
+            this.InitializeComponent();
         }
 
-        private async void DocumentView_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        private async void DocumentViewDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            viewModel = (OpenDocumentViewModel)e.NewValue;
-            LinqPadSourceTextContainer container = new LinqPadSourceTextContainer(editor);
-            viewModel.Init(container);
-            editor.IntellisenseProvider = new IntellisenseProvider(
-                editor,
-                viewModel.MainViewModel.RoslynHost,
-                viewModel.DocumentId);
+            this.viewModel = (OpenDocumentViewModel)e.NewValue;
+            var container = new LinqPadSourceTextContainer(this.editor);
+            this.viewModel.Init(container);
 
-            editor.SignatureHelpService = new SignatureHelpService(
-                viewModel.MainViewModel.RoslynHost,
-                viewModel.DocumentId);
+            this.editor.IntellisenseProvider = new IntellisenseProvider(
+                this.viewModel.MainViewModel.RoslynHost,
+                this.viewModel.DocumentId);
 
-            string text = await viewModel.LoadText();
+            this.editor.SignatureHelpService = new SignatureHelpService(
+                this.viewModel.MainViewModel.RoslynHost,
+                this.viewModel.DocumentId);
 
-            referencesProvider = new ReferencesProvider(viewModel.MainViewModel.RoslynHost);
-            colorizerService = new LnqPadColorizerService(editor);
-            editor.TextArea.TextView.BackgroundRenderers.Add(colorizerService);
-            diagnosticService = new DiagnosticsService(viewModel.MainViewModel.RoslynHost);
-            editor.AppendText(text);
-            editor.TextChanged += Editor_TextChanged;
-            editor.ToolTipRequest = ToolTipRequest;
+            var text = await this.viewModel.LoadText();
+
+            this.referencesProvider = new ReferencesProvider(this.viewModel.MainViewModel.RoslynHost);
+            this.diagnosticService  = new DiagnosticsService(this.viewModel.MainViewModel.RoslynHost);
+            this.colorizerService   = new LnqPadColorizerService(this.editor);
+            this.editor.TextArea.TextView.BackgroundRenderers.Add(this.colorizerService);
+
+            this.editor.AppendText(text);
+            this.editor.TextChanged += this.EditorTextChanged;
+            this.editor.ToolTipRequest = this.ToolTipRequest;
         }
 
-        private async void Editor_TextChanged(object sender, EventArgs e)
+        private async void EditorTextChanged(object sender, EventArgs e)
         {
-            await ProcessDiagnostics();
+            await this.ProcessDiagnostics();
         }
 
         private async Task ProcessDiagnostics()
         {
-            colorizerService.Clear();
-            var diagnostics = await diagnosticService.GetDiagnostics(viewModel.DocumentId);
+            this.colorizerService.Clear();
+            var diagnostics = await this.diagnosticService.GetDiagnostics(this.viewModel.DocumentId);
             foreach (var diagnostic in diagnostics)
             {
                 var start = diagnostic.Location.SourceSpan.Start;
                 var length = diagnostic.Location.SourceSpan.End - diagnostic.Location.SourceSpan.Start;
-                var marker = colorizerService.TryAdd(start, length);
-                if (marker != null)
-                {
-                    marker.MarkerColor = GetDiagnosticColor(diagnostic);
-                    marker.ToolTip = diagnostic.GetMessage();
-                }
+                var marker = this.colorizerService.TryAdd(start, length);
+                if (marker == null)
+                    continue;
+                marker.MarkerColor = GetDiagnosticColor(diagnostic);
+                marker.ToolTip = diagnostic.GetMessage();
             }
         }
 
@@ -79,9 +83,9 @@ namespace LinqPad.Views
             if (!args.InDocument)
                 return;
 
-            var offset = editor.Document.GetOffset(args.LogicalPosition);
+            var offset = this.editor.Document.GetOffset(args.LogicalPosition);
 
-            var markersAtOffset = colorizerService.GetMarkersAtOffset(offset);
+            var markersAtOffset = this.colorizerService.GetMarkersAtOffset(offset);
             var markerWithToolTip = markersAtOffset.FirstOrDefault(marker => marker.ToolTip != null);
             if (markerWithToolTip != null)
             {

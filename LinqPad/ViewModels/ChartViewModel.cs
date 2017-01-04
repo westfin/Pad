@@ -13,83 +13,88 @@ namespace LinqPad.ViewModels
     public sealed class ChartViewModel : INotifyPropertyChanged
     {
         private PlotModel currentPlotModel;
-        public  PlotModel CurrentPlotModel
-        {
-            get { return currentPlotModel; }
-            set
-            {
-                if (currentPlotModel == value)
-                    return;
-                currentPlotModel = value;
-                OnRaisePropertyChanged(nameof(CurrentPlotModel));
-            }
-        }
-
-        private DelegateCommand nextCommand;
-        public  DelegateCommand NextCommand => nextCommand;
-
-        private DelegateCommand previosCommand;
-        public  DelegateCommand PreviosCommand => previosCommand;
-
-        public  ObservableCollection<PlotModel> PlotModels
-        {
-            get;
-        }
 
         public ChartViewModel()
         {
-            PlotModels = new ObservableCollection<PlotModel>();
+            this.PlotModels = new ObservableCollection<PlotModel>();
 
-            nextCommand    = new DelegateCommand(new Action(Next));
-            previosCommand = new DelegateCommand(new Action(Previos));
+            this.NextCommand    = new DelegateCommand(new Action(this.Next));
+            this.PreviosCommand = new DelegateCommand(new Action(this.Previos));
         }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        public PlotModel CurrentPlotModel
+        {
+            get
+            {
+                return this.currentPlotModel;
+            }
+
+            set
+            {
+                if (this.currentPlotModel == value)
+                {
+                    return;
+                }
+                this.currentPlotModel = value;
+                this.OnRaisePropertyChanged(nameof(this.CurrentPlotModel));
+            }
+        }
+
+        public DelegateCommand NextCommand { get; }
+
+        public DelegateCommand PreviosCommand { get; }
+
+        public ObservableCollection<PlotModel> PlotModels { get; }
+
+        public void AddChart(PlotModel chart)
+        {
+            if (chart == null)
+            {
+                throw new ArgumentNullException(nameof(chart));
+            }
+            this.PlotModels.Add(chart);
+            this.CurrentPlotModel = chart;
+        }
+
+        public void ClearCharts()
+        {
+            this.PlotModels.Clear();
+            this.CurrentPlotModel = null;
+        }
+
 
         private void Next()
         {
-            if (currentPlotModel == null)
+            if (this.currentPlotModel == null)
             {
                 return;
             }
-            var nextid = PlotModels.IndexOf(currentPlotModel) + 1;
-            if (nextid < PlotModels.Count)
+            var nextid = this.PlotModels.IndexOf(this.currentPlotModel) + 1;
+            if (nextid < this.PlotModels.Count)
             {
-                CurrentPlotModel = PlotModels.ElementAt(nextid);
+                this.CurrentPlotModel = this.PlotModels.ElementAt(nextid);
             }
         }
 
         private void Previos()
         {
-            if(currentPlotModel==null)
+            if (this.currentPlotModel == null)
             {
                 return;
             }
-            var previd = PlotModels.IndexOf(currentPlotModel) - 1;
+
+            var previd = this.PlotModels.IndexOf(this.currentPlotModel) - 1;
             if (previd >= 0)
             {
-                CurrentPlotModel = PlotModels.ElementAt(previd);
+                this.CurrentPlotModel = this.PlotModels.ElementAt(previd);
             }
-        }
-
-        public void AddChart(PlotModel chart)
-        {
-            if(chart == null)
-            {
-                throw new ArgumentNullException(nameof(chart));
-            }
-            PlotModels.Add(chart);
-            CurrentPlotModel = chart;
-        }
-
-        public void ClearCharts()
-        {
-            PlotModels.Clear();
-            CurrentPlotModel = null;
         }
 
         private void OnRaisePropertyChanged(string propName)
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propName));
+            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propName));
         }
-        public event PropertyChangedEventHandler PropertyChanged;
     }
 }

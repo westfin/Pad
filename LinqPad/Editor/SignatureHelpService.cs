@@ -1,12 +1,13 @@
-﻿using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Shared.Extensions;
 
 namespace LinqPad.Editor
@@ -16,9 +17,11 @@ namespace LinqPad.Editor
         private static readonly SymbolDisplayFormat SymbolDisplayFormat =
             DefaultSymbolDisplayFormat();
 
-        private readonly RoslynEditorHost host;
+        private readonly LinqPadEditorHost host;
+
         private readonly DocumentId documentId;
-        public SignatureHelpService(RoslynEditorHost host, DocumentId documentId)
+
+        public SignatureHelpService(LinqPadEditorHost host, DocumentId documentId)
         {
             this.host = host;
             this.documentId = documentId;
@@ -26,16 +29,20 @@ namespace LinqPad.Editor
 
         public async Task<SignatureHelp> GetSignatureHelp(int position)
         {
-            var document   = host.GetDocument(documentId);
+            var document   = this.host.GetDocument(this.documentId);
             var signature  = new SignatureHelp();
             var invocation = await GetInvocation(document, position).ConfigureAwait(false);
 
             if (invocation == null)
+            {
                 return null;
+            }
 
             var methods = GetMethodOverloads(invocation.SemanticModel, invocation.Node);
             if (methods == null)
+            {
                 return null;
+            }
 
             foreach (var comma in invocation.ArgumentList.Arguments.GetSeparators())
             {
@@ -43,6 +50,7 @@ namespace LinqPad.Editor
                 {
                     break;
                 }
+
                 signature.ActiveParameter += 1;
             }
 
@@ -59,21 +67,26 @@ namespace LinqPad.Editor
                 var buildItem = BuildItem(method, invocation.SemanticModel, position);
                 signatureHelpItemList.Add(buildItem);
                 var score = InvocationScore(method, types);
-                if (score > bestScore)
+                if (score <= bestScore)
                 {
-                    bestScore = score;
-                    bestScoredItem = buildItem;
+                    continue;
                 }
+
+                bestScore = score;
+                bestScoredItem = buildItem;
             }
+
             if (bestScoredItem == null)
+            {
                 return null;
+            }
 
             signature.ActiveSignature = signatureHelpItemList.IndexOf(bestScoredItem);
             signature.SignatureHelpItems = signatureHelpItemList;
             return signature;
         }
 
-        private async Task<InvocationContext> GetInvocation(Document document, int position)
+        private static async Task<InvocationContext> GetInvocation(Document document, int position)
         {
             var tree = await document.GetSyntaxTreeAsync();
             var root = await tree.GetRootAsync();
@@ -96,7 +109,7 @@ namespace LinqPad.Editor
                 }
 
                 var objectCreation = node as ObjectCreationExpressionSyntax;
-                if (objectCreation != null && objectCreation.ArgumentList != null)
+                if (objectCreation?.ArgumentList != null)
                 {
                     if (objectCreation.Span.Contains(position - 1))
                     {
@@ -109,12 +122,14 @@ namespace LinqPad.Editor
                         };
                     }
                 }
+
                 node = node.Parent;
             }
+
             return null;
         }
 
-        private int InvocationScore(IMethodSymbol symbol, IEnumerable<TypeInfo> types)
+        private static int InvocationScore(IMethodSymbol symbol, IEnumerable<TypeInfo> types)
         {
             var parameters = GetParameters(symbol);
             if (parameters.Count() < types.Count())
@@ -143,8 +158,7 @@ namespace LinqPad.Editor
             return score;
         }
 
-
-        private IEnumerable<IMethodSymbol> GetMethodOverloads(SemanticModel model, SyntaxNode node)
+        private static IEnumerable<IMethodSymbol> GetMethodOverloads(SemanticModel model, SyntaxNode node)
         {
             ISymbol symbol = null;
             var symbolInfo = model.GetSymbolInfo(node);
@@ -157,48 +171,30 @@ namespace LinqPad.Editor
                 symbol = symbolInfo.CandidateSymbols.First();
             }
 
-            if (symbol == null || symbol.ContainingType == null)
-            {
-                return new IMethodSymbol[] { };
-            }
-
-            return symbol.ContainingType.GetMembers(symbol.Name).OfType<IMethodSymbol>();
+            return symbol?.ContainingType == null ? new IMethodSymbol[] { } :
+                symbol.ContainingType.GetMembers(symbol.Name).OfType<IMethodSymbol>();
         }
         
-        private IEnumerable<IParameterSymbol> GetParameters(IMethodSymbol method)
+        private static IEnumerable<IParameterSymbol> GetParameters(IMethodSymbol method)
         {
-            if(!method.IsExtensionMethod)
-            {
-                return method.Parameters;
-            }
-            else
-            {
-                return method.Parameters.RemoveAt(0);
-            }
+            return !method.IsExtensionMethod ? method.Parameters : method.Parameters.RemoveAt(0);
         }
         
-        private SignatureHelpItem BuildItem(IMethodSymbol method, SemanticModel model, int position)
+        private static SignatureHelpItem BuildItem(IMethodSymbol method, SemanticModel model, int position)
         {
-            var item = new SignatureHelpItem() { Documentation = method.GetDocumentationCommentXml() };
-            if(method.MethodKind == MethodKind.Constructor)
+            var item = new SignatureHelpItem
             {
-                item.Name = method.ContainingType.Name;
-            }
-            else
-            {
-                item.Name = method.Name;
-            }
-            item.Lable = method.ToMinimalDisplayParts(model, position, SymbolDisplayFormat);
-
-            item.Parametrs = GetParameters(method).Select(i =>
-            {
-                return new SignatureHelpParametr()
+                Name  = method.MethodKind == MethodKind.Constructor ? method.ContainingType.Name : method.Name,
+                Lable = method.ToMinimalDisplayParts(model, position, SymbolDisplayFormat),
+                Documentation = method.GetDocumentationCommentXml(),
+                Parametrs     = GetParameters(method).Select(i => new SignatureHelpParametr()
                 {
-                    Name = i.Name,
+                    Name  = i.Name,
                     Lable = i.ToMinimalDisplayParts(model, position),
                     Documentation = i.GetDocumentationCommentXml()
-                };
-            });
+                })
+            };
+
             return item;
         }
 
@@ -216,43 +212,48 @@ namespace LinqPad.Editor
                         SymbolDisplayParameterOptions.IncludeParamsRefOut |
                         SymbolDisplayParameterOptions.IncludeType |
                         SymbolDisplayParameterOptions.IncludeName,
-                    miscellaneousOptions:
-                        SymbolDisplayMiscellaneousOptions.UseSpecialTypes,
-                    extensionMethodStyle:
-                        SymbolDisplayExtensionMethodStyle.InstanceMethod
-                    
-            );
+                    miscellaneousOptions: SymbolDisplayMiscellaneousOptions.UseSpecialTypes,
+                    extensionMethodStyle: SymbolDisplayExtensionMethodStyle.InstanceMethod);
         } 
     }
 
     public sealed class InvocationContext
     {
-        public SemanticModel SemanticModel      { get; set; }
-        public int Position                     { get; set; }
-        public SyntaxNode Node                  { get; set; }
-        public ArgumentListSyntax ArgumentList  { get; set; }
+        public SemanticModel SemanticModel { get; set; }
+
+        public int Position { get; set; }
+
+        public SyntaxNode Node { get; set; }
+
+        public ArgumentListSyntax ArgumentList { get; set; }
     }
 
     public sealed class SignatureHelp
     {
         public List<SignatureHelpItem> SignatureHelpItems { get; set; }
-        public int ActiveSignature { get; set; }
-        public int ActiveParameter { get; set; }
 
+        public int ActiveSignature { get; set; }
+
+        public int ActiveParameter { get; set; }
     }
 
     public sealed class SignatureHelpItem
     {
         public string Name { get; set; }
-        public IEnumerable<SymbolDisplayPart>  Lable { get; set; }
+
+        public IEnumerable<SymbolDisplayPart> Lable { get; set; }
+
         public string Documentation { get; set; }
+
         public IEnumerable<SignatureHelpParametr> Parametrs { get; set; }
     }
 
     public sealed class SignatureHelpParametr
     {
         public string Name { get; set; }
+
         public IEnumerable<SymbolDisplayPart> Lable { get; set; }
+
         public string Documentation { get; set; }
     }
 }

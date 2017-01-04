@@ -9,7 +9,6 @@
         xmlns:models = "clr-namespace:LinqPad.ViewModels"
         xmlns:views = "clr-namespace:LinqPad.Views"
         xmlns:ed="http://icsharpcode.net/sharpdevelop/avalonedit"
-        xmlns:controls="clr-namespace:LinqPad.Controls"
         xmlns:oxy="http://oxyplot.org/wpf"
         xmlns:themes="clr-namespace:AvalonDock.Themes.VS2013;assembly=AvalonDock.Themes.VS2013"
         mc:Ignorable="d"
@@ -102,7 +101,7 @@
 
     </FrameworkElement.Resources>
     <Grid>
-        <adoc:DockingManager x:Name="dockingManager"
+        <adoc:DockingManager x:Name="DockingManager"
                              ActiveContent=  "{Binding CurrentDocumentViewModel}"
                              DocumentsSource="{Binding OpenDocuments, Mode=OneWay}">
 

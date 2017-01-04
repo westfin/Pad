@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using LinqPad.Commands;
@@ -12,54 +13,40 @@ namespace LinqPad.ViewModels
     public sealed class DataGridViewModel : INotifyPropertyChanged
     {
         private ResultTable<object> currentTable;
-        public  ResultTable<object> CurrentTable
-        {
-            get { return currentTable; }
-            set
-            {
-                if (currentTable == value)
-                    return;
-                currentTable = value;
-                OnRaisePropertyChanged(nameof(CurrentTable));
-            }
-        }
-
-        public ObservableCollection<ResultTable<object>> Tables { get; }
-        public DelegateCommand NextCommand    { get; }
-        public DelegateCommand PreviosCommand { get; }
 
         public DataGridViewModel()
         {
-            Tables = new ObservableCollection<ResultTable<object>>();
-            AddTable(new ResultTable<object>() { Title = "test title" });
+            this.Tables = new ObservableCollection<ResultTable<object>>();
+            this.AddTable(new ResultTable<object>() { Title = "test title" });
 
-            NextCommand    = new DelegateCommand(new Action(Next));
-            PreviosCommand = new DelegateCommand(new Action(Previos));
+            this.NextCommand    = new DelegateCommand(new Action(this.Next));
+            this.PreviosCommand = new DelegateCommand(new Action(this.Previos));
         }
 
-        private void Next()
-        {
-            if(currentTable == null)
-            {
-                return;
-            }
-            var nextid = Tables.IndexOf(currentTable) + 1;
-            if (nextid < Tables.Count)
-            {
-                CurrentTable = Tables.ElementAt(nextid);
-            }
-        }
+        public event PropertyChangedEventHandler PropertyChanged;
 
-        private void Previos()
+        public ObservableCollection<ResultTable<object>> Tables { get; }
+
+        public DelegateCommand NextCommand { get; }
+
+        public DelegateCommand PreviosCommand { get; }
+
+        public ResultTable<object> CurrentTable
         {
-            if (currentTable == null)
+            get
             {
-                return;
+                return this.currentTable;
             }
-            var previd = Tables.IndexOf(currentTable) - 1;
-            if (previd >= 0)
+
+            set
             {
-                CurrentTable = Tables.ElementAt(previd);
+                if (this.currentTable == value)
+                {
+                    return;
+                }
+
+                this.currentTable = value;
+                this.OnRaisePropertyChanged(nameof(this.CurrentTable));
             }
         }
 
@@ -69,20 +56,48 @@ namespace LinqPad.ViewModels
             {
                 throw new ArgumentNullException(nameof(table));
             }
-            Tables.Add(table);
-            CurrentTable = table;
+
+            this.Tables.Add(table);
+            this.CurrentTable = table;
         }
 
         public void ClearTables()
         {
-            Tables.Clear();
-            CurrentTable = null;
+            this.Tables.Clear();
+            this.CurrentTable = null;
+        }
+
+        private void Next()
+        {
+            if (this.currentTable == null)
+            {
+                return;
+            }
+
+            var nextid = this.Tables.IndexOf(this.currentTable) + 1;
+            if (nextid < this.Tables.Count)
+            {
+                this.CurrentTable = this.Tables.ElementAt(nextid);
+            }
+        }
+
+        private void Previos()
+        {
+            if (this.currentTable == null)
+            {
+                return;
+            }
+
+            var previd = this.Tables.IndexOf(this.currentTable) - 1;
+            if (previd >= 0)
+            {
+                this.CurrentTable = this.Tables.ElementAt(previd);
+            }
         }
 
         private void OnRaisePropertyChanged(string propName)
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propName));
+            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propName));
         }
-        public event PropertyChangedEventHandler PropertyChanged;
     }
 }

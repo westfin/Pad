@@ -1,10 +1,11 @@
-﻿using ICSharpCode.AvalonEdit.Document;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media;
+
+using ICSharpCode.AvalonEdit.Document;
 
 namespace LinqPad.Editor
 {
@@ -17,27 +18,34 @@ namespace LinqPad.Editor
         public VisualMarker(LnqPadColorizerService service, int startOffset, int length)
         {
             this.service = service;
-            StartOffset = startOffset;
-            Length = length;
-        }
-
-        public void Delete()
-        {
-            service.Remove(this);
+            this.StartOffset = startOffset;
+            this.Length = length;
         }
 
         public Color MarkerColor
         {
-            get { return markerColor; }
+            get
+            {
+                return this.markerColor;
+            }
+
             set
             {
-                if (markerColor == value)
+                if (this.markerColor == value)
+                {
                     return;
-                markerColor = value;
-                service.Redraw(this);
+                }
+
+                this.markerColor = value;
+                this.service.Redraw(this);
             }
         }
 
         public object ToolTip { get; set; }
+
+        public void Delete()
+        {
+            this.service.Remove(this);
+        }
     }
 }

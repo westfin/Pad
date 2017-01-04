@@ -9,12 +9,13 @@ namespace LinqPad
 {
     public sealed class ResultTable<T>
     {
-        public ObservableCollection<T> ItemsSource { get; set; }
-        public string Title { get; set; }
-
         public ResultTable()
         {
-            ItemsSource = new ObservableCollection<T>();
+            this.ItemsSource = new ObservableCollection<T>();
         }
+
+        public ObservableCollection<T> ItemsSource { get; set; }
+
+        public string Title { get; set; }
     }
 }

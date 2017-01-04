@@ -8,7 +8,7 @@
              xmlns:models="clr-namespace:LinqPad.ViewModels"
              mc:Ignorable="d" 
              xmlns:adoc ="http://schemas.xceed.com/wpf/xaml/avalondock"
-             DataContextChanged="DocumentView_DataContextChanged"
+             DataContextChanged="DocumentViewDataContextChanged"
              d:DataContext="{d:DesignInstance models:OpenDocumentViewModel}">
     <DockPanel>
         <Grid>

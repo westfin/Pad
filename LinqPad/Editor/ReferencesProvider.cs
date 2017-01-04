@@ -10,8 +10,8 @@ namespace LinqPad.Editor
 {
     public sealed class ReferencesProvider
     {
-        private readonly RoslynEditorHost host;
-        public ReferencesProvider(RoslynEditorHost host)
+        private readonly LinqPadEditorHost host;
+        public ReferencesProvider(LinqPadEditorHost host)
         {
             this.host = host;
         }
@@ -22,9 +22,9 @@ namespace LinqPad.Editor
             var root = await tree.GetRootAsync() as CompilationUnitSyntax;
 
             var directives = root?.GetReferenceDirectives();
-            if (!(directives.Count > 0))
-                return null;
-            return directives.Select(i => i.File.ValueText);
+            if (directives != null)
+                return !(directives.Count > 0) ? null : directives.Select(i => i.File.ValueText);
+            return null;
         }
     }
 }

@@ -40,7 +40,7 @@ namespace LinqPad.Execution
                 var uiThread = new Thread(() =>
                 {
                     dispatcher = Dispatcher.CurrentDispatcher;
-                    resetEvent.Set();
+                    resetEvent?.Set();
                     Dispatcher.Run();
                 });
                 uiThread.SetApartmentState(ApartmentState.STA);
@@ -80,14 +80,14 @@ namespace LinqPad.Execution
                     list.Add(item);
                 }
                 Dumped?.Invoke(list);
-            });
+            }, token);
         }
 
-        public Task Initialize(IEnumerable<string> references, IEnumerable<string> imports)
+        public Task Initialize(IEnumerable<string> refs, IEnumerable<string> imps)
         {
             scriptOptions = scriptOptions.
-                WithReferences(references).
-                WithImports(imports);
+                WithReferences(refs).
+                WithImports(imps);
 
             return Task.CompletedTask;
         }

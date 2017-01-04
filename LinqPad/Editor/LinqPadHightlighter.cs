@@ -1,27 +1,28 @@
-﻿using ICSharpCode.AvalonEdit.Highlighting;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ICSharpCode.AvalonEdit.Document;
-using ICSharpCode.AvalonEdit;
 
-using TextDocument = ICSharpCode.AvalonEdit.Document.TextDocument;
+using ICSharpCode.AvalonEdit;
+using ICSharpCode.AvalonEdit.Document;
+using ICSharpCode.AvalonEdit.Highlighting;
+
 using Microsoft.CodeAnalysis;
 
 namespace LinqPad.Editor
 {
     public sealed class LinqPadHightlighter : IHighlighter
     {
-        private readonly IDocument document;
         private readonly DocumentId documentId;
 
         public LinqPadHightlighter(IDocument document, DocumentId documentId)
         {
-            this.document = document;
+            this.Document = document;
             this.documentId = documentId;
         }
+
+        public event HighlightingStateChangedEventHandler HighlightingStateChanged;
 
         public HighlightingColor DefaultTextColor
         {
@@ -31,9 +32,7 @@ namespace LinqPad.Editor
             }
         }
 
-        public IDocument Document => document;
-
-        public event HighlightingStateChangedEventHandler HighlightingStateChanged;
+        public IDocument Document { get; }
 
         public void BeginHighlighting()
         {

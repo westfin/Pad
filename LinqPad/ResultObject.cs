@@ -10,35 +10,33 @@ namespace LinqPad
 {
     public class ResultObject
     {
-        private string header;
-        public  string Header => header;
-
-        private object value;
-        public  object Value => value;
-
-        private string typeName;
-        public string  TypeName => typeName;
-
-
-        private ObservableCollection<ResultObject> childrens;
-        public  ObservableCollection<ResultObject> Childrens => childrens;
-
         public ResultObject(object value, string header = "")
         {
-            this.header   = header;
-            this.value    = value;
-            this.typeName = value.GetType().Name;
-            var enumerable = value as IEnumerable;
-            childrens = new ObservableCollection<ResultObject>();
-            if (enumerable !=null)
-            {
-                foreach (var item in enumerable)
-                {
-                    childrens.Add(new ResultObject(item));
-                }
-                header = header == "" ? $"enumerable type {childrens.Count}" : header;
+            this.Header    = header;
+            this.Value     = value;
+            this.TypeName  = value.GetType().Name;
+            this.Childrens = new ObservableCollection<ResultObject>();
 
+            var enumerable = value as IEnumerable;
+            if (enumerable == null)
+            {
+                return;
             }
+
+            foreach (var item in enumerable)
+            {
+                this.Childrens.Add(new ResultObject(item));
+            }
+
+            header = header == string.Empty ? $"enumerable type {this.Childrens.Count}" : header;
         }
+
+        public string Header { get; }
+
+        public object Value { get; }
+
+        public string TypeName { get; }
+
+        public ObservableCollection<ResultObject> Childrens { get; }
     }
 }

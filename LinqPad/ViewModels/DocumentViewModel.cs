@@ -1,40 +1,14 @@
-﻿using Microsoft.CodeAnalysis;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Collections.ObjectModel;
 
 namespace LinqPad.ViewModels
 {
     public sealed class DocumentViewModel
     {
-        private static readonly string fileExtension = ".csx";
-        private ObservableCollection<DocumentViewModel> children;
-        public ObservableCollection<DocumentViewModel> Childrens
-        {
-            get
-            {
-                if (children == null && IsFolder)
-                    children = GetChildrens();
-                return children;
-            }
-        }
+        private const string FileExtension = ".csx";
 
-        public string Name
-        {
-            get
-            {
-                if (IsFolder)
-                    return System.IO.Path.GetFileName(Path);
-                else
-                    return System.IO.Path.GetFileNameWithoutExtension(Path);
-            }
-        }
-        public   string Path { get; set; }
-        public bool IsFolder { get; private set; }
+        private ObservableCollection<DocumentViewModel> children;
 
         public DocumentViewModel(string path, bool isFolder)
         {
@@ -42,15 +16,33 @@ namespace LinqPad.ViewModels
             this.IsFolder = isFolder;
         }
 
+        public ObservableCollection<DocumentViewModel> Childrens
+        {
+            get
+            {
+                if (this.children == null && this.IsFolder)
+                {
+                    this.children = this.GetChildrens();
+                }
+
+                return this.children;
+            }
+        }
+
+        public string Name => this.IsFolder ? System.IO.Path.GetFileName(this.Path) :
+            System.IO.Path.GetFileNameWithoutExtension(this.Path);
+
+        public string Path { get; }
+
+        public bool IsFolder { get; }
 
         private ObservableCollection<DocumentViewModel> GetChildrens()
         {
-            var childsDirs = Directory.EnumerateDirectories(Path);
-            var childfiles = Directory.EnumerateFiles(Path);
+            var childsDirs = Directory.EnumerateDirectories(this.Path);
+            var childfiles = Directory.EnumerateFiles(this.Path);
 
-            var allFiles = childsDirs.Select(n => new DocumentViewModel(n, true)).
-                Concat(childfiles.Where(n=> n.EndsWith(fileExtension)).
-                Select(n=>new DocumentViewModel(n, false)));
+            var allFiles = childsDirs.Select(n => new DocumentViewModel(n, true)).Concat(
+                childfiles.Where(n => n.EndsWith(FileExtension)).Select(n => new DocumentViewModel(n, false)));
 
             return new ObservableCollection<DocumentViewModel>(allFiles);
         }

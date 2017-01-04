@@ -1,23 +1,27 @@
-﻿using ICSharpCode.AvalonEdit.CodeCompletion;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Media;
+
+using ICSharpCode.AvalonEdit.CodeCompletion;
 using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Editing;
-using System.Windows.Media;
-using Microsoft.CodeAnalysis.Completion;
+
 using Microsoft.CodeAnalysis;
-using System.Diagnostics;
-using System.Windows;
+using Microsoft.CodeAnalysis.Completion;
 
 namespace LinqPad.Editor
 {
     public sealed class CompletionData : ICompletionData
     {
-        private Document document;
-        private CompletionItem completionItem;
+        private readonly Document document;
+
+        private readonly CompletionItem completionItem;
+
         public CompletionData(CompletionItem item, Document document)
         {
             var key = item.GetGlyph();
@@ -27,16 +31,21 @@ namespace LinqPad.Editor
             this.Text = item.DisplayText;
             this.Content = item.DisplayText;
         }
-        public object Content       { get; }
-        public object Description   { get; }
-        public ImageSource Image    { get; }
-        public double Priority      { get; }
-        public string Text          { get; }
+
+        public object Content { get; }
+
+        public object Description { get; }
+
+        public ImageSource Image { get; }
+
+        public double Priority { get; }
+
+        public string Text { get; }
 
         public async void Complete(TextArea textArea, ISegment completionSegment, EventArgs insertionRequestEventArgs)
         {
-            var completionChanges = await CompletionService.GetService(document)
-                .GetChangeAsync(document, completionItem).ConfigureAwait(false);
+            var completionChanges = await CompletionService.GetService(this.document)
+                .GetChangeAsync(this.document, this.completionItem).ConfigureAwait(false);
 
             var change = completionChanges.TextChange;
             var textDocument = textArea.Document;
@@ -49,8 +58,7 @@ namespace LinqPad.Editor
                         string.Empty);
                 }
 
-                textDocument.Replace(change.Span.Start, change.Span.Length,
-                    new StringTextSource(change.NewText));
+                textDocument.Replace(change.Span.Start, change.Span.Length, new StringTextSource(change.NewText));
             }
         }
     }

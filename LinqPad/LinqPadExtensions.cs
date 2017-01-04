@@ -1,5 +1,4 @@
-﻿using OxyPlot;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -7,10 +6,18 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using OxyPlot;
+
 namespace LinqPad
 {
     public static class LinqPadExtensions
     {
+        public static event Action<object, string> Dumped;
+
+        public static event Action<PlotModel> Ploted;
+
+        public static event Action<ResultTable<object>> Tabled;
+
         public static T Dump<T>(this T obj, string nameval = "")
         {
             Dumped?.Invoke(obj, nameval);
@@ -32,9 +39,5 @@ namespace LinqPad
             });
             return enumerable;
         }
-
-        public static event Action <   object, string    > Dumped;
-        public static event Action <      PlotModel      > Ploted;
-        public static event Action < ResultTable<object> > Tabled;
     }
 }

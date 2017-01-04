@@ -1,24 +1,26 @@
-﻿using ICSharpCode.AvalonEdit.CodeCompletion;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.ComponentModel;
-using System.Windows.Controls;
-using System.Diagnostics;
 using System.Windows;
-using Microsoft.CodeAnalysis;
+using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
 
+using ICSharpCode.AvalonEdit.CodeCompletion;
+
+using Microsoft.CodeAnalysis;
+
 namespace LinqPad.Editor
 {
-    class OverloadProvider : IOverloadProvider
+    public sealed class OverloadProvider : IOverloadProvider
     {
         private readonly SignatureHelp signature;
 
-        private int    selectedIndex;
+        private int selectedIndex;
         private object currentHeader;
         private object currentContent;
         private string currentIndexText;
@@ -26,74 +28,105 @@ namespace LinqPad.Editor
         public OverloadProvider(SignatureHelp signature)
         {
             this.signature = signature;
-            if(signature.ActiveSignature > 0)
+            if (signature.ActiveSignature > 0)
             {
-                selectedIndex = signature.ActiveSignature;
+                this.selectedIndex = signature.ActiveSignature;
             }
-            BuildContent();
+
+            this.BuildContent();
         }
 
-        public int Count => signature.SignatureHelpItems.Count();
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        public int Count => this.signature.SignatureHelpItems.Count();
 
         public object CurrentContent
         {
-            get { return currentContent; }
+            get
+            {
+                return this.currentContent;
+            }
+
             set
             {
-                if (currentContent == value)
+                if (this.currentContent == value)
+                {
                     return;
-                currentContent = value;
-                OnPropertyChanged(nameof(CurrentContent));
+                }
+
+                this.currentContent = value;
+                this.OnPropertyChanged(nameof(this.CurrentContent));
             }
         }
 
         public object CurrentHeader
         {
-            get { return currentHeader; }
+            get
+            {
+                return this.currentHeader;
+            }
+
             private set
             {
-                if (currentHeader == value)
+                if (this.currentHeader == value)
+                {
                     return;
-                currentHeader = value;
-                OnPropertyChanged(nameof(CurrentHeader));
+                }
+
+                this.currentHeader = value;
+                this.OnPropertyChanged(nameof(this.CurrentHeader));
             }
         }
 
         public string CurrentIndexText
         {
-            get { return currentIndexText; }
+            get
+            {
+                return this.currentIndexText;
+            }
+
             set
             {
-                if (currentIndexText == null)
+                if (this.currentIndexText == null)
+                {
                     return;
-                currentIndexText = value;
-                OnPropertyChanged(nameof(CurrentIndexText));
+                }
+
+                this.currentIndexText = value;
+                this.OnPropertyChanged(nameof(this.CurrentIndexText));
             }
         }
 
         public int SelectedIndex
         {
-            get { return selectedIndex; }
+            get
+            {
+                return this.selectedIndex;
+            }
 
             set
             {
-                if (selectedIndex == value)
+                if (this.selectedIndex == value)
+                {
                     return;
-                selectedIndex = value;
-                OnPropertyChanged(nameof(SelectedIndex));
-                BuildContent();
+                }
+
+                this.selectedIndex = value;
+                this.OnPropertyChanged(nameof(this.SelectedIndex));
+                this.BuildContent();
             }
         }
 
         private void BuildContent()
         {
-            var item = signature.SignatureHelpItems[selectedIndex];
+            var item = this.signature.SignatureHelpItems[this.selectedIndex];
             var counter = new TextBlock();
-            if (signature.SignatureHelpItems.Count > 1)
+            if (this.signature.SignatureHelpItems.Count > 1)
             {
-                counter.Text = $"{selectedIndex + 1} of {signature.SignatureHelpItems.Count} ";
+                counter.Text = $"{this.selectedIndex + 1} of {this.signature.SignatureHelpItems.Count} ";
                 counter.FontWeight = FontWeights.Bold;
             }
+
             var headerPanel = new WrapPanel()
             {
                 Orientation = Orientation.Horizontal,
@@ -115,23 +148,23 @@ namespace LinqPad.Editor
                 Children = { new TextBlock() { Text = item.Documentation } }
             };
 
-            if(signature.ActiveParameter < item.Parametrs.Count() && selectedIndex > 0)
+            if (this.signature.ActiveParameter < item.Parametrs.Count() && this.selectedIndex > 0)
             {
-                var param = item.Parametrs.ToArray()[signature.ActiveParameter];
-                if (signature.ActiveParameter < item.Parametrs.Count())
+                var param = item.Parametrs.ToArray()[this.signature.ActiveParameter];
+                if (this.signature.ActiveParameter < item.Parametrs.Count())
+                {
                     contetnPanel.Children.Add(param.Lable.ToTextBlock());
+                }
             }
 
-            CurrentHeader  = headerPanel;
-            CurrentContent = contetnPanel;
+            this.CurrentHeader  = headerPanel;
+            this.CurrentContent = contetnPanel;
         }
 
         private void OnPropertyChanged(string propName)
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propName));
+            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propName));
         }
-
-        public event PropertyChangedEventHandler PropertyChanged;
     }
 
     public static class SymbolDisplayPartExtension

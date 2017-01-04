@@ -14,8 +14,6 @@ namespace LinqPad.Commands
         private readonly Func<Task> executeAsync;
         private readonly Func<bool> canExecute;
 
-        public event EventHandler CanExecuteChanged;
-
         public DelegateCommand(Action execute, Func<bool> canExecute = null)
         {
             this.execute = execute;
@@ -28,31 +26,33 @@ namespace LinqPad.Commands
             this.canExecute = canExecute;
         }
 
+        public event EventHandler CanExecuteChanged;
+
         public bool CanExecute(object parameter)
         {
-            return canExecute == null || canExecute();
+            return this.canExecute == null || this.canExecute();
         }
 
         public void Execute(object parameter)
         {
-            if(executeAsync !=null)
+            if (this.executeAsync != null)
             {
-                 ExecuteAsync();
+                this.ExecuteAsync();
             }
             else
             {
-                execute();
+                this.execute();
             }
         }
 
         public void RaiseExecuteChanged()
         {
-            CanExecuteChanged?.Invoke(this, EventArgs.Empty);
+            this.CanExecuteChanged?.Invoke(this, EventArgs.Empty);
         }
 
         private async void ExecuteAsync()
         {
-            await executeAsync().ConfigureAwait(true);
+            await this.executeAsync().ConfigureAwait(true);
         }
     }
 }

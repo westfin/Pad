@@ -277,7 +277,6 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Controls\AttachedColumnBehavior.cs" />
     <Compile Include="Editor\DiagnosticsService.cs" />
     <Compile Include="Editor\CompletionData.cs" />
     <Compile Include="Editor\ExtensionsCompletionItem.cs" />
@@ -304,6 +303,7 @@
     <Compile Include="ViewModels\OpenDocumentViewModel.cs" />
     <Compile Include="Views\DocumentView.xaml.cs">
       <DependentUpon>DocumentView.xaml</DependentUpon>
+      <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="Editor\VisualMarker.cs" />
     <Page Include="MainWindow.xaml">

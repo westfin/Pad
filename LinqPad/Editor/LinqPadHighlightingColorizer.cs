@@ -23,7 +23,7 @@ namespace LinqPad.Editor
 
         protected override IHighlighter CreateHighlighter(TextView textView, TextDocument document)
         {
-            return new LinqPadHightlighter(document, documentId);
+            return new LinqPadHightlighter(document, this.documentId);
         }
     }
 }

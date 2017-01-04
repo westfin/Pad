@@ -9,12 +9,6 @@ namespace LinqPad.Editor
 {
     public sealed class LinqPadOut : TextWriter
     {
-        public override Encoding Encoding
-        {
-            get
-            {
-                return Encoding.UTF32;
-            }
-        }
+        public override Encoding Encoding => Encoding.UTF32;
     }
 }
