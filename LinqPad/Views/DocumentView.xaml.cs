@@ -12,6 +12,8 @@ using Microsoft.CodeAnalysis;
 
 namespace LinqPad.Views
 {
+    using System.Text;
+
     /// <summary>
     /// Логика взаимодействия для DocumentView.xaml
     /// </summary>

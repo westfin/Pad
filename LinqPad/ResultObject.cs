@@ -8,14 +8,17 @@ using System.Threading.Tasks;
 
 namespace LinqPad
 {
+    using System.Diagnostics;
     using System.Reflection;
 
     public class ResultObject
     {
-        public ResultObject(object value, string header = null)
+        private const int MaxDepth = 5;
+
+        public ResultObject(object value, int depth, string header = null)
         {
             this.Childrens = new ObservableCollection<ResultObject>();
-            this.BuildObject(value, header);
+            this.BuildObject(value, depth, header);
         }
 
         public string Header { get; private set; }
@@ -26,8 +29,14 @@ namespace LinqPad
 
         public ObservableCollection<ResultObject> Childrens { get; }
 
-        private void BuildObject(object value, string header = null)
+        private void BuildObject(object value, int depth, string header = null)
         {
+            var currentDepth = depth + 1;
+            if (currentDepth > MaxDepth)
+            {
+                return;
+            }
+
             if (value == null)
             {
                 this.Value = "<null>";
@@ -46,13 +55,18 @@ namespace LinqPad
                 return;
             }
 
-            var enumerable = value as IEnumerable;
+            var enumerable = value as ICollection;
             if (enumerable != null)
             {
-                this.Value = $"<enumarable>";
+                this.Value = $"<enumarable> count = {enumerable.Count}";
+                var i = 0;
                 foreach (var item in enumerable)
                 {
-                    this.Childrens.Add(new ResultObject(item));
+                    this.Childrens.Add(new ResultObject(
+                        value: item,
+                        depth: currentDepth,
+                        header: $"[{i}]"));
+                    ++i;
                 }
 
                 return;
@@ -65,11 +79,12 @@ namespace LinqPad
                 var propType = propVal?.GetType();
                 if (type == propType)
                 {
-                    continue;    
+                    continue;
                 }
 
                 this.Childrens.Add(new ResultObject(
-                    value: property?.GetValue(value), 
+                    value: property?.GetValue(value),
+                    depth: currentDepth, 
                     header: property?.Name));
             }
         }

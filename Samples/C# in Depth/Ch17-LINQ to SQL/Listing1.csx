@@ -6,34 +6,69 @@ using System.Data.Linq.Mapping;
 
 
 [Table(Name = "Table")]
-public class Customer
+public class Companie
 {
-    private int Id;
-    [Column(IsPrimaryKey = true, Storage = nameof(Id))]
-    public int ID
+    private string name;
+    [Column(IsPrimaryKey = true, Storage = nameof(name))]
+    public string Name  
     {
         get
         {
-            return this.Id;
+            return this.name;
         }
+
         set
         {
-            this.Id = value;
+            this.name = value;
         }
 
     }
 
-    private string title;
-    [Column(Storage = nameof(title))]
-    public string Title
+    private int? employeeCount;
+    [Column(IsPrimaryKey = true, Storage = nameof(employeeCount))]
+    public int? EmployeeCount
     {
         get
         {
-            return this.title;
+            return this.employeeCount;
+        }
+
+        set
+        {
+            this.employeeCount = value;
+        }
+
+    }
+
+
+    private DateTime? startDate;
+    [Column(IsPrimaryKey = true, Storage = nameof(startDate))]
+    public DateTime? StartDate
+    {
+        get
+        {
+            return this.startDate;
+        }
+
+        set
+        {
+            this.startDate = value;
+        }
+
+    }
+
+
+    private string ceo;
+    [Column(Storage = nameof(ceo))]
+    public string CEO
+    {
+        get
+        {
+            return this.ceo;
         }
         set
         {
-            this.title = value;
+            this.ceo = value;
         }
     }
 }

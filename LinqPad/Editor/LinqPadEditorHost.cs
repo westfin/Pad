@@ -34,7 +34,7 @@ namespace LinqPad.Editor
                         typeof(object), typeof(Thread), typeof(Task), typeof(List<>), typeof(Regex),
                         typeof(StringBuilder), typeof(Uri), typeof(Enumerable), typeof(IEnumerable),
                         typeof(Path), typeof(Assembly), typeof(LinqPadExtensions), typeof(OxyPlot.PlotModel),
-                        typeof(OxyPlot.Series.Series)
+                        typeof(OxyPlot.Series.Series), typeof(LinqProviders.ExcelFactory)
                     }
                 .ToImmutableArray();
 
@@ -157,7 +157,8 @@ namespace LinqPad.Editor
             var options = new CSharpCompilationOptions(
                 outputKind: OutputKind.NetModule,
                 usings: this.DefaultImports,
-                metadataReferenceResolver: this.resolver);
+                metadataReferenceResolver: this.resolver,
+                sourceReferenceResolver: ScriptSourceResolver.Default);
             return options;
         }
     }

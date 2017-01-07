@@ -59,7 +59,7 @@ namespace LinqPad.ViewModels
                 }
 
                 this.documents = value;
-                this.OnPropertyChanged(nameof(this.Documents));
+                this.RaisePropertyChanged(nameof(this.Documents));
             }
         }
 
@@ -78,7 +78,7 @@ namespace LinqPad.ViewModels
                 }
 
                 this.openDocuments = value;
-                this.OnPropertyChanged(nameof(this.OpenDocuments));
+                this.RaisePropertyChanged(nameof(this.OpenDocuments));
             }
         }
 
@@ -97,7 +97,7 @@ namespace LinqPad.ViewModels
                 }
 
                 this.currentDocumentViewModel = value;
-                this.OnPropertyChanged(nameof(this.CurrentDocumentViewModel));
+                this.RaisePropertyChanged(nameof(this.CurrentDocumentViewModel));
             }
         }
 
@@ -105,10 +105,14 @@ namespace LinqPad.ViewModels
 
         public void OpenDocument(DocumentViewModel source)
         {
-            if (!source.IsFolder)
+            if (source.IsFolder)
             {
-                this.openDocuments.Add(new OpenDocumentViewModel(this, source));
+                return;
             }
+
+            var doc = new OpenDocumentViewModel(this, source);
+            this.openDocuments.Add(doc);
+            this.CurrentDocumentViewModel = doc;
         }
 
         private void LinqPadExtensionsTabled(ResultTable<object> obj)
@@ -134,7 +138,7 @@ namespace LinqPad.ViewModels
             this.openDocuments.Add(document);
         }
 
-        private void OnPropertyChanged(string name = null)
+        private void RaisePropertyChanged(string name = null)
         {
             this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }

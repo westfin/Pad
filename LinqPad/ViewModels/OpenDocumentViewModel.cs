@@ -18,6 +18,8 @@ using Microsoft.CodeAnalysis;
 
 namespace LinqPad.ViewModels
 {
+    using System.Windows;
+
     using Microsoft.CodeAnalysis.Scripting;
 
     public class OpenDocumentViewModel : INotifyPropertyChanged
@@ -137,9 +139,8 @@ namespace LinqPad.ViewModels
 
             try
             {
-                await this.scriptRunner.ExecuteAsync(
-                    code: code,
-                    token: this.cancellationTokenSource.Token).ConfigureAwait(true);
+                await this.scriptRunner.ExecuteAsync(code: code, token: this.cancellationTokenSource.Token)
+                    .ConfigureAwait(true);
             }
             catch (CompilationErrorException e)
             {
@@ -147,12 +148,18 @@ namespace LinqPad.ViewModels
                 {
                     this.Results.Add(new ResultObject(
                         value: diagnostic,
+                        depth: 0,
                         header: "exception"));
                 }
             }
-
-            // await linqPadHost.ExecuteAsync(code, cancellationTokenSource.Token);
-            this.IsRunning = false;
+            catch (Exception e)
+            {
+                MessageBox.Show(e.StackTrace);
+            }
+            finally
+            {
+                this.IsRunning = false;
+            }
         }
 
         private async Task Restart()

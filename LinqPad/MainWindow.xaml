@@ -102,7 +102,7 @@
     </FrameworkElement.Resources>
     <Grid>
         <adoc:DockingManager x:Name="DockingManager"
-                             ActiveContent=  "{Binding CurrentDocumentViewModel}"
+                             ActiveContent=  "{Binding CurrentDocumentViewModel, Mode=TwoWay}"
                              DocumentsSource="{Binding OpenDocuments, Mode=OneWay}">
 
             <adoc:DockingManager.Theme>

@@ -60,9 +60,9 @@ namespace LinqPad.Execution
             var script = CSharpScript.Create(code)
                 .WithOptions(this.scriptOptions);
 
-            await(await this.dispatcher.InvokeAsync(
-                callback: async () =>
-                    {
+            await (await this.dispatcher.InvokeAsync(
+                       callback: async () =>
+                           {
                         await script.RunAsync(cancellationToken: token).ConfigureAwait(false);
                         await this.DequeResultObjects(token).ConfigureAwait(false);
                     },
@@ -78,7 +78,10 @@ namespace LinqPad.Execution
 
         private void LinqPadExtensionsDumped(object arg1, string arg2)
         {
-            this.queue.Enqueue(new ResultObject(arg1, arg2));
+            this.queue.Enqueue(new ResultObject(
+                value: arg1,
+                depth: 0,
+                header: arg2));
         }
 
         private Task DequeResultObjects(CancellationToken token)
