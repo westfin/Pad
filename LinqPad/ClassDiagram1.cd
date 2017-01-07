@@ -3,7 +3,7 @@
   <Class Name="LinqPad.ViewModels.MainViewModel">
     <Position X="3" Y="0.5" Width="2.75" />
     <TypeIdentifier>
-      <HashCode>AgABIgAACAQAAEAAIAAAAAAAkAYAAAASAAAIAAAAiCA=</HashCode>
+      <HashCode>AgABIgAACCQAAEAAIAAAAAAAkAYAAIACAAACAAAAACA=</HashCode>
       <FileName>ViewModels\MainViewModel.cs</FileName>
     </TypeIdentifier>
     <ShowAsAssociation>
@@ -15,11 +15,12 @@
       <Property Name="Documents" />
       <Property Name="OpenDocuments" />
     </ShowAsCollectionAssociation>
+    <Lollipop Position="0.2" />
   </Class>
   <Class Name="LinqPad.ViewModels.ChartViewModel" Collapsed="true" BaseTypeListCollapsed="true">
     <Position X="8" Y="4" Width="2" />
     <TypeIdentifier>
-      <HashCode>AgAgCAAAgAAAAIAEAECAAQBAgAAAAAAAQAAAAAAAIAA=</HashCode>
+      <HashCode>AgAgCAAAAAAAAIAEAECAAQAAgAAAAAAAQAAAAAAAIAA=</HashCode>
       <FileName>ViewModels\ChartViewModel.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.213" Collapsed="true" />
@@ -35,14 +36,14 @@
   <Class Name="LinqPad.ViewModels.DocumentViewModel" Collapsed="true">
     <Position X="8" Y="1" Width="2" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAYAAAAEAAQABAAAQQAAAAAAAAAAAAA=</HashCode>
+      <HashCode>AAAAAAAAAAAAAAYAAAAEAAQABAAAQAAAAAEAAAAAAAA=</HashCode>
       <FileName>ViewModels\DocumentViewModel.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="LinqPad.ViewModels.OpenDocumentViewModel" Collapsed="true" BaseTypeListCollapsed="true">
     <Position X="8" Y="2" Width="2.75" />
     <TypeIdentifier>
-      <HashCode>GAAAgAgAIACAAEBAIACAQKAAiAIAgAgCIDgCAACAAAI=</HashCode>
+      <HashCode>EAAAgAgAIACAAEBAIACAQKAAiAAAgAACIDgCAAAAAAI=</HashCode>
       <FileName>ViewModels\OpenDocumentViewModel.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" Collapsed="true" />

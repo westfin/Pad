@@ -54,7 +54,7 @@ namespace LinqPad.Editor
             this.Attach();
         }
 
-        public Action<ToolTipArgs> ToolTipRequest { get; set; }
+        public Action<ToolTipArgs> ToolTipRequest { private get; set; }
 
         public Brush CompletionBackground
         {

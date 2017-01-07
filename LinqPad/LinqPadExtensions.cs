@@ -39,5 +39,12 @@ namespace LinqPad
             });
             return enumerable;
         }
+
+        public static bool IsPrimitiveType(this Type type)
+        {
+            return type.IsPrimitive 
+                || type == typeof(string) 
+                || type == typeof(decimal);
+        }
     }
 }

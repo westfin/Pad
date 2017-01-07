@@ -1,35 +1,32 @@
 ﻿using System;
-using LinqPad.Editor;
-using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Threading.Tasks;
-using LinqPad.Commands;
-using LinqPad.Execution;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
-using System.Windows.Threading;
+using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
+using System.Windows.Threading;
+
+using LinqPad.Commands;
+using LinqPad.Editor;
+using LinqPad.Execution;
+
 using LinqPadHosting;
+
+using Microsoft.CodeAnalysis;
 
 namespace LinqPad.ViewModels
 {
+    using Microsoft.CodeAnalysis.Scripting;
+
     public class OpenDocumentViewModel : INotifyPropertyChanged
     {
-        private readonly DocumentViewModel document;
-
-        private readonly MainViewModel mainViewModel;
-
         private readonly ScriptRunner scriptRunner;
 
         private readonly LinqPadHost linqPadHost;
 
-        private readonly ObservableCollection<ResultObject> results;
-
         private readonly Dispatcher dispatcher;
-
-        private DocumentId documentId;
 
         private bool isRunning;
 
@@ -37,37 +34,35 @@ namespace LinqPad.ViewModels
 
         public OpenDocumentViewModel(MainViewModel mainViewModel, DocumentViewModel document)
         {
-            this.dispatcher = Dispatcher.CurrentDispatcher;
-            this.mainViewModel = mainViewModel;
-            this.document = document;
+            this.dispatcher    = Dispatcher.CurrentDispatcher;
+            this.MainViewModel = mainViewModel;
+            this.Document      = document;
 
             this.RunCommand     = new DelegateCommand(this.Run, () => !this.isRunning);
             this.StopCommand    = new DelegateCommand(new Action(this.Stop));
             this.RestartCommand = new DelegateCommand(this.Restart, () => !this.isRunning);
-            this.scriptRunner   = new ScriptRunner(
-                references: mainViewModel.RoslynHost.DefaultReferences.OfType<PortableExecutableReference>().Select(i => i.FilePath),
-                imports: mainViewModel.RoslynHost.DefaultImports);
 
-            this.linqPadHost =
-                new LinqPadHost(
-                    references: mainViewModel.RoslynHost.DefaultReferences.OfType<PortableExecutableReference>().Select(i => i.FilePath),
-                    imports: mainViewModel.RoslynHost.DefaultImports);
+            this.scriptRunner = new ScriptRunner(
+                refs: mainViewModel.LinqPadEditorHost.DefaultReferences.OfType<PortableExecutableReference>().Select(i => i.FilePath),
+                imps: mainViewModel.LinqPadEditorHost.DefaultImports);
+
+            this.linqPadHost = new LinqPadHost(
+                    references: mainViewModel.LinqPadEditorHost.DefaultReferences.OfType<PortableExecutableReference>().Select(i => i.FilePath),
+                    imports: mainViewModel.LinqPadEditorHost.DefaultImports);
 
             this.scriptRunner.Dumped += this.ScriptRunnerDumped;
-            this.results = new ObservableCollection<ResultObject>();
+            this.Results = new ObservableCollection<ResultObject>();
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
         public string Title => this.Document != null ? this.Document.Name : "New";
 
-        public DocumentViewModel Document => this.document;
+        public DocumentId DocumentId { get; private set; }
 
-        public DocumentId DocumentId => this.documentId;
+        public MainViewModel MainViewModel { get; }
 
-        public MainViewModel MainViewModel => this.mainViewModel;
-
-        public ObservableCollection<ResultObject> Results => this.results;
+        public ObservableCollection<ResultObject> Results { get; }
 
         public bool IsRunning
         {
@@ -95,24 +90,26 @@ namespace LinqPad.ViewModels
 
         public DelegateCommand RestartCommand { get; }
 
+        private DocumentViewModel Document { get; }
+
         public void Init(LinqPadSourceTextContainer container)
         {
-            this.documentId = this.mainViewModel.RoslynHost.AddDocument(container);
+            this.DocumentId = this.MainViewModel.LinqPadEditorHost.AddDocument(container);
         }
 
         public Document GetDocument()
         {
-            return this.MainViewModel.RoslynHost.GetDocument(this.documentId);
+            return this.MainViewModel.LinqPadEditorHost.GetDocument(this.DocumentId);
         }
 
         public async Task<string> LoadText()
         {
-            if (this.document == null)
+            if (this.Document == null)
             {
                 return string.Empty;
             }
 
-            using (var stream = new StreamReader(new FileStream(this.document.Path, FileMode.Open)))
+            using (var stream = new StreamReader(new FileStream(this.Document.Path, FileMode.Open)))
             {
                 return await stream.ReadToEndAsync();
             }
@@ -124,7 +121,7 @@ namespace LinqPad.ViewModels
             {
                 foreach (var item in obj)
                 {
-                    this.results.Add(item);
+                    this.Results.Add(item);
                 }
             });
         }
@@ -132,11 +129,27 @@ namespace LinqPad.ViewModels
         private async Task Run()
         {
             this.IsRunning = true;
-            this.results.Clear();
-            this.mainViewModel.ChartViewModel.ClearCharts();
-            this.mainViewModel.DataGridViewModel.ClearTables();
+            this.Results.Clear();
+            this.MainViewModel.ChartViewModel.ClearCharts();
+            this.MainViewModel.DataGridViewModel.ClearTables();
+
             var code = await this.GetTextCode().ConfigureAwait(true);
-            await this.scriptRunner.ExecuteAsync(code, this.cancellationTokenSource.Token).ConfigureAwait(true);
+
+            try
+            {
+                await this.scriptRunner.ExecuteAsync(
+                    code: code,
+                    token: this.cancellationTokenSource.Token).ConfigureAwait(true);
+            }
+            catch (CompilationErrorException e)
+            {
+                foreach (var diagnostic in e.Diagnostics)
+                {
+                    this.Results.Add(new ResultObject(
+                        value: diagnostic,
+                        header: "exception"));
+                }
+            }
 
             // await linqPadHost.ExecuteAsync(code, cancellationTokenSource.Token);
             this.IsRunning = false;
@@ -161,12 +174,13 @@ namespace LinqPad.ViewModels
 
         private async Task<string> GetTextCode()
         {
-            var text =
-                await this.mainViewModel.RoslynHost.GetDocument(this.documentId).GetTextAsync().ConfigureAwait(false);
-
+            var text = await this.MainViewModel
+                .LinqPadEditorHost
+                .GetDocument(this.DocumentId)
+                .GetTextAsync()
+                .ConfigureAwait(false);
             return text.ToString();
         }
-
 
         private void OnRaisePropertyChanged(string propName)
         {

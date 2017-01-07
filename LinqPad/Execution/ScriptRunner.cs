@@ -1,7 +1,4 @@
-﻿using ICSharpCode.AvalonEdit;
-using Microsoft.CodeAnalysis.CSharp.Scripting;
-using Microsoft.CodeAnalysis.Scripting;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -12,34 +9,40 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
 
+using ICSharpCode.AvalonEdit;
+
+using Microsoft.CodeAnalysis.CSharp.Scripting;
+using Microsoft.CodeAnalysis.Scripting;
+
 namespace LinqPad.Execution
 {
+    using Microsoft.CodeAnalysis;
+
     public sealed class ScriptRunner
     {
-        private ScriptOptions scriptOptions =
-            ScriptOptions.Default;
+        private readonly ConcurrentQueue<ResultObject> queue;
 
-        public event Action<IList<ResultObject>> Dumped;
+        private ScriptOptions scriptOptions = ScriptOptions.Default;
+
         private Dispatcher dispatcher;
-        private ConcurrentQueue<ResultObject> queue;
 
         private List<string> references;
+
         private List<string> imports;
-        public ScriptRunner(IEnumerable<string> references, IEnumerable<string> imports)
+
+        public ScriptRunner(IEnumerable<string> refs, IEnumerable<string> imps)
         {
-            this.references = references.ToList();
-            this.imports = imports.ToList();
-            scriptOptions = scriptOptions.
-                WithReferences(references).
-                WithImports(imports);
-            LinqPadExtensions.Dumped += LinqPadExtensions_Dumped;
-            queue = new ConcurrentQueue<ResultObject>();
+            this.references = refs.ToList();
+            this.imports = imps.ToList();
+            this.scriptOptions = this.scriptOptions.WithReferences(refs).WithImports(imps);
+            LinqPadExtensions.Dumped += this.LinqPadExtensionsDumped;
+            this.queue = new ConcurrentQueue<ResultObject>();
 
             using (var resetEvent = new ManualResetEventSlim(false))
             {
                 var uiThread = new Thread(() =>
                 {
-                    dispatcher = Dispatcher.CurrentDispatcher;
+                    this.dispatcher = Dispatcher.CurrentDispatcher;
                     resetEvent?.Set();
                     Dispatcher.Run();
                 });
@@ -50,46 +53,49 @@ namespace LinqPad.Execution
             }
         }
 
-        private void LinqPadExtensions_Dumped(object arg1, string arg2)
-        {
-            queue.Enqueue(new ResultObject(arg1, arg2));
-        }
+        public event Action<IList<ResultObject>> Dumped;
 
         public async Task ExecuteAsync(string code, CancellationToken token)
         {
-            var script = CSharpScript.Create(code).
-                WithOptions(scriptOptions);
+            var script = CSharpScript.Create(code)
+                .WithOptions(this.scriptOptions);
 
-            await (await dispatcher.InvokeAsync(async () =>
-            {
-                await script.RunAsync(cancellationToken: token).ConfigureAwait(false);
-                await DequeResultObjects(token).ConfigureAwait(false);
-            },
-            priority: DispatcherPriority.SystemIdle,
-            cancellationToken: token)).ConfigureAwait(false);
-        }
-
-        private Task DequeResultObjects(CancellationToken token)
-        {
-            return Task.Run(() =>
-            {
-                ResultObject item;
-                var list = new List<ResultObject>();
-                while (queue.TryDequeue(out item) && !token.IsCancellationRequested)
-                {
-                    list.Add(item);
-                }
-                Dumped?.Invoke(list);
-            }, token);
+            await(await this.dispatcher.InvokeAsync(
+                callback: async () =>
+                    {
+                        await script.RunAsync(cancellationToken: token).ConfigureAwait(false);
+                        await this.DequeResultObjects(token).ConfigureAwait(false);
+                    },
+                priority: DispatcherPriority.SystemIdle,
+                cancellationToken: token)).ConfigureAwait(false);
         }
 
         public Task Initialize(IEnumerable<string> refs, IEnumerable<string> imps)
         {
-            scriptOptions = scriptOptions.
-                WithReferences(refs).
-                WithImports(imps);
-
+            this.scriptOptions = this.scriptOptions.WithReferences(refs).WithImports(imps);
             return Task.CompletedTask;
+        }
+
+        private void LinqPadExtensionsDumped(object arg1, string arg2)
+        {
+            this.queue.Enqueue(new ResultObject(arg1, arg2));
+        }
+
+        private Task DequeResultObjects(CancellationToken token)
+        {
+            return Task.Run(
+            () =>
+                {
+                    ResultObject item;
+                    var list = new List<ResultObject>();
+                    while (this.queue.TryDequeue(out item) && !token.IsCancellationRequested)
+                    {
+                        list.Add(item);
+                    }
+
+                    this.Dumped?.Invoke(list);
+                },
+            token);
         }
     }
 }

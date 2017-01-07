@@ -37,17 +37,17 @@ namespace LinqPad.Views
             this.viewModel.Init(container);
 
             this.editor.IntellisenseProvider = new IntellisenseProvider(
-                this.viewModel.MainViewModel.RoslynHost,
+                this.viewModel.MainViewModel.LinqPadEditorHost,
                 this.viewModel.DocumentId);
 
             this.editor.SignatureHelpService = new SignatureHelpService(
-                this.viewModel.MainViewModel.RoslynHost,
+                this.viewModel.MainViewModel.LinqPadEditorHost,
                 this.viewModel.DocumentId);
 
             var text = await this.viewModel.LoadText();
 
-            this.referencesProvider = new ReferencesProvider(this.viewModel.MainViewModel.RoslynHost);
-            this.diagnosticService  = new DiagnosticsService(this.viewModel.MainViewModel.RoslynHost);
+            this.referencesProvider = new ReferencesProvider(this.viewModel.MainViewModel.LinqPadEditorHost);
+            this.diagnosticService  = new DiagnosticsService(this.viewModel.MainViewModel.LinqPadEditorHost);
             this.colorizerService   = new LnqPadColorizerService(this.editor);
             this.editor.TextArea.TextView.BackgroundRenderers.Add(this.colorizerService);
 
@@ -56,42 +56,6 @@ namespace LinqPad.Views
             this.editor.ToolTipRequest = this.ToolTipRequest;
         }
 
-        private async void EditorTextChanged(object sender, EventArgs e)
-        {
-            await this.ProcessDiagnostics();
-        }
-
-        private async Task ProcessDiagnostics()
-        {
-            this.colorizerService.Clear();
-            var diagnostics = await this.diagnosticService.GetDiagnostics(this.viewModel.DocumentId);
-            foreach (var diagnostic in diagnostics)
-            {
-                var start = diagnostic.Location.SourceSpan.Start;
-                var length = diagnostic.Location.SourceSpan.End - diagnostic.Location.SourceSpan.Start;
-                var marker = this.colorizerService.TryAdd(start, length);
-                if (marker == null)
-                    continue;
-                marker.MarkerColor = GetDiagnosticColor(diagnostic);
-                marker.ToolTip = diagnostic.GetMessage();
-            }
-        }
-
-
-        private void ToolTipRequest(ToolTipArgs args)
-        {
-            if (!args.InDocument)
-                return;
-
-            var offset = this.editor.Document.GetOffset(args.LogicalPosition);
-
-            var markersAtOffset = this.colorizerService.GetMarkersAtOffset(offset);
-            var markerWithToolTip = markersAtOffset.FirstOrDefault(marker => marker.ToolTip != null);
-            if (markerWithToolTip != null)
-            {
-                args.SetToolTip(markerWithToolTip.ToolTip);
-            }
-        }
 
         private static Color GetDiagnosticColor(Diagnostic diagnostic)
         {
@@ -107,6 +71,48 @@ namespace LinqPad.Views
                     return Colors.Red;
                 default:
                     throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        private async void EditorTextChanged(object sender, EventArgs e)
+        {
+            await this.ProcessDiagnostics();
+        }
+
+        private async Task ProcessDiagnostics()
+        {
+            this.colorizerService.Clear();
+            var diagnostics = await this.diagnosticService.GetDiagnostics(this.viewModel.DocumentId);
+            foreach (var diagnostic in diagnostics)
+            {
+                var start  = diagnostic.Location.SourceSpan.Start;
+                var length = diagnostic.Location.SourceSpan.End - diagnostic.Location.SourceSpan.Start;
+                var marker = this.colorizerService.TryAdd(start, length);
+                if (marker == null)
+                {
+                    continue;
+                }
+
+                marker.MarkerColor = GetDiagnosticColor(diagnostic);
+                marker.ToolTip = diagnostic.GetMessage();
+            }
+        }
+
+
+        private void ToolTipRequest(ToolTipArgs args)
+        {
+            if (!args.InDocument)
+            {
+                return;
+            }
+
+            var offset = this.editor.Document.GetOffset(args.LogicalPosition);
+
+            var markersAtOffset = this.colorizerService.GetMarkersAtOffset(offset);
+            var markerWithToolTip = markersAtOffset.FirstOrDefault(marker => marker.ToolTip != null);
+            if (markerWithToolTip != null)
+            {
+                args.SetToolTip(markerWithToolTip.ToolTip);
             }
         }
     }

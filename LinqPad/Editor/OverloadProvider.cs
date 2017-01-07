@@ -180,7 +180,7 @@ namespace LinqPad.Editor
             return textBlock;
         }
 
-        public static Run ToRun(this SymbolDisplayPart text)
+        private static Run ToRun(this SymbolDisplayPart text)
         {
             var run = new Run(text.ToString());
             switch (text.Kind)

@@ -7,7 +7,7 @@ using OxyPlot;
 
 namespace LinqPad.ViewModels
 {
-    public sealed class MainViewModel
+    public sealed class MainViewModel : INotifyPropertyChanged
     {
         private OpenDocumentViewModel currentDocumentViewModel;
 
@@ -36,15 +36,13 @@ namespace LinqPad.ViewModels
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public LinqPadEditorHost RoslynHost { get; } = new LinqPadEditorHost();
+        public static string Title => "LinqPad";
+
+        public LinqPadEditorHost LinqPadEditorHost { get; } = new LinqPadEditorHost();
 
         public ChartViewModel ChartViewModel { get; }
 
         public DataGridViewModel DataGridViewModel { get; }
-
-        public string Title => "LinqPad";
-
-        public bool IsOpenAnyDocuments => this.openDocuments.Count != 0;
 
         public ObservableCollection<DocumentViewModel> Documents
         {
@@ -72,7 +70,7 @@ namespace LinqPad.ViewModels
                 return this.openDocuments;
             }
 
-            set
+            private set
             {
                 if (value == this.openDocuments)
                 {
@@ -102,6 +100,8 @@ namespace LinqPad.ViewModels
                 this.OnPropertyChanged(nameof(this.CurrentDocumentViewModel));
             }
         }
+
+        private bool IsOpenAnyDocuments => this.openDocuments.Count != 0;
 
         public void OpenDocument(DocumentViewModel source)
         {

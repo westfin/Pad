@@ -287,7 +287,7 @@
     <Compile Include="Editor\LnqPadColorizerService.cs" />
     <Compile Include="Editor\OverloadProvider.cs" />
     <Compile Include="Editor\ReferencesProvider.cs" />
-    <Compile Include="Editor\RoslynEditorHost.cs" />
+    <Compile Include="Editor\LinqPadEditorHost.cs" />
     <Compile Include="Editor\SignatureHelpService.cs" />
     <Compile Include="Editor\ToolTipArgs.cs" />
     <Compile Include="LinqPadExtensions.cs" />

@@ -25,8 +25,6 @@ namespace LinqPad.ViewModels
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public ObservableCollection<ResultTable<object>> Tables { get; }
-
         public DelegateCommand NextCommand { get; }
 
         public DelegateCommand PreviosCommand { get; }
@@ -49,6 +47,8 @@ namespace LinqPad.ViewModels
                 this.OnRaisePropertyChanged(nameof(this.CurrentTable));
             }
         }
+
+        private ObservableCollection<ResultTable<object>> Tables { get; }
 
         public void AddTable(ResultTable<object> table)
         {

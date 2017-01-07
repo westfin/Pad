@@ -1,5 +1,4 @@
-﻿using LinqPad.ViewModels;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,8 +12,11 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using Microsoft.CodeAnalysis.CSharp.Scripting;
+
 using LinqPad.Editor;
+using LinqPad.ViewModels;
+
+using Microsoft.CodeAnalysis.CSharp.Scripting;
 
 namespace LinqPad
 {
@@ -28,8 +30,8 @@ namespace LinqPad
 
         public MainWindow()
         {
-            InitializeComponent();
-            DataContext = mainViewModel;
+            this.InitializeComponent();
+            this.DataContext = this.mainViewModel;
             Console.SetOut(new LinqPadOut());
         }
 
@@ -40,7 +42,7 @@ namespace LinqPad
                 var documentViewModel = ((FrameworkElement)e.Source).DataContext as DocumentViewModel;
                 if (documentViewModel != null)
                 {
-                    mainViewModel.OpenDocument(documentViewModel);
+                    this.mainViewModel.OpenDocument(documentViewModel);
                 }
             }
         }

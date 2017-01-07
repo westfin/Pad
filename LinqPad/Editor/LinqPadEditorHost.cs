@@ -33,8 +33,8 @@ namespace LinqPad.Editor
                     {
                         typeof(object), typeof(Thread), typeof(Task), typeof(List<>), typeof(Regex),
                         typeof(StringBuilder), typeof(Uri), typeof(Enumerable), typeof(IEnumerable),
-                        typeof(Path), typeof(Assembly), typeof(LinqPadExtensions),
-                        typeof(OxyPlot.PlotModel), typeof(OxyPlot.Series.Series)
+                        typeof(Path), typeof(Assembly), typeof(LinqPadExtensions), typeof(OxyPlot.PlotModel),
+                        typeof(OxyPlot.Series.Series)
                     }
                 .ToImmutableArray();
 
@@ -50,7 +50,7 @@ namespace LinqPad.Editor
         private readonly CompositionContext compositionContext;
 
         private readonly CSharpParseOptions parseOptions = new CSharpParseOptions(
-            languageVersion: LanguageVersion.CSharp6,
+            languageVersion: LanguageVersion.Latest,
             documentationMode: DocumentationMode.Parse,
             kind: SourceCodeKind.Script);
 
@@ -101,7 +101,7 @@ namespace LinqPad.Editor
         {
             var workspace = new LinqPadWorkspace(host: this.host, roslynEditorHost: this);
             var project = this.CreateProject(workspace.CurrentSolution);
-            var document = this.CreateDocument(
+            var document = CreateDocument(
                 workspace: workspace,
                 project: project,
                 textContainer: container);
@@ -118,12 +118,23 @@ namespace LinqPad.Editor
                 workspace.CurrentSolution.GetDocument(documentId) : null;
         }
 
-        public TService GetService<TService>()
+
+        private static Document CreateDocument(LinqPadWorkspace workspace, LinqPadSourceTextContainer textContainer, Project project)
         {
-            return this.compositionContext.GetExport<TService>();
+            var id = DocumentId.CreateNewId(project.Id);
+            var solution = project.Solution.AddDocument(id, project.Name, textContainer.CurrentText);
+            workspace.SetCurrentSolution(solution);
+            workspace.OpenDocument(id, textContainer);
+            return solution.GetDocument(id);
         }
 
-        public Project CreateProject(Solution solution)
+        private static MetadataReference CreateMetadataReference(string location)
+        {
+            return MetadataReference.CreateFromFile(
+                path: location);
+        }
+
+        private Project CreateProject(Solution solution)
         {
             var name = "Program " + this.programId++;
             var projectInfo = ProjectInfo.Create(
@@ -138,21 +149,6 @@ namespace LinqPad.Editor
 
             solution = solution.AddProject(projectInfo);
             return solution.GetProject(projectInfo.Id);
-        }
-
-        public Document CreateDocument(LinqPadWorkspace workspace, LinqPadSourceTextContainer textContainer, Project project)
-        {
-            var id = DocumentId.CreateNewId(project.Id);
-            var solution = project.Solution.AddDocument(id, project.Name, textContainer.CurrentText);
-            workspace.SetCurrentSolution(solution);
-            workspace.OpenDocument(id, textContainer);
-            return solution.GetDocument(id);
-        }
-
-        private static MetadataReference CreateMetadataReference(string location)
-        {
-            return MetadataReference.CreateFromFile(
-                path: location);
         }
 
         private CSharpCompilationOptions CreateCompilationOptions()
