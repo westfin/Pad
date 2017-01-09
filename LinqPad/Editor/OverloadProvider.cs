@@ -47,7 +47,7 @@ namespace LinqPad.Editor
                 return this.currentContent;
             }
 
-            set
+            private set
             {
                 if (this.currentContent == value)
                 {

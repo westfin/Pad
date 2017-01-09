@@ -60,14 +60,27 @@ namespace LinqPad.Execution
             var script = CSharpScript.Create(code)
                 .WithOptions(this.scriptOptions);
 
-            await (await this.dispatcher.InvokeAsync(
+            await(await this.dispatcher.InvokeAsync(
                        callback: async () =>
                            {
-                        await script.RunAsync(cancellationToken: token).ConfigureAwait(false);
-                        await this.DequeResultObjects(token).ConfigureAwait(false);
-                    },
+                               await script.RunAsync(cancellationToken: token).ConfigureAwait(false);
+                               await this.DequeResultObjects(token).ConfigureAwait(false);
+                           },
                 priority: DispatcherPriority.SystemIdle,
                 cancellationToken: token)).ConfigureAwait(false);
+
+            //this.thread = new Thread(
+            //    async () =>
+            //        {
+            //            await script.RunAsync(cancellationToken: token).ConfigureAwait(false);
+            //            await this.DequeResultObjects(token).ConfigureAwait(false);
+            //        });
+
+            //this.thread.Start();
+        }
+
+        public void StopScritp()
+        {
         }
 
         public Task Initialize(IEnumerable<string> refs, IEnumerable<string> imps)

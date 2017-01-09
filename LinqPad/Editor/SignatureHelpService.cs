@@ -187,7 +187,7 @@ namespace LinqPad.Editor
                 Name  = method.MethodKind == MethodKind.Constructor ? method.ContainingType.Name : method.Name,
                 Lable = method.ToMinimalDisplayParts(model, position, SymbolDisplayFormat),
                 Documentation = method.GetDocumentationCommentXml(),
-                Parametrs     = GetParameters(method).Select(i => new SignatureHelpParametr()
+                Parametrs = GetParameters(method).Select(i => new SignatureHelpParametr()
                 {
                     Name  = i.Name,
                     Lable = i.ToMinimalDisplayParts(model, position),

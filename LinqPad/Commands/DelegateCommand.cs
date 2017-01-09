@@ -14,17 +14,17 @@ namespace LinqPad.Commands
         private readonly Func<Task> executeAsync;
         private readonly Func<bool> canExecute;
 
-        public DelegateCommand(Action execute, Func<bool> canExecute = null)
-        {
-            this.execute = execute;
-            this.canExecute = canExecute;
-        }
+public DelegateCommand(Action execute, Func<bool> canExecute = null)
+{
+    this.execute = execute;
+    this.canExecute = canExecute;
+}
 
-        public DelegateCommand(Func<Task> executeAsync, Func<bool> canExecute = null)
-        {
-            this.executeAsync = executeAsync;
-            this.canExecute = canExecute;
-        }
+public DelegateCommand(Func<Task> executeAsync, Func<bool> canExecute = null)
+{
+    this.executeAsync = executeAsync;
+    this.canExecute = canExecute;
+}
 
         public event EventHandler CanExecuteChanged;
 

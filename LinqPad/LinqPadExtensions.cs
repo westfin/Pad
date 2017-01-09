@@ -30,7 +30,7 @@ namespace LinqPad
             return plot;
         }
 
-        public static IEnumerable<T> Table<T>(this IEnumerable<T> enumerable, string title)
+        public static IEnumerable<T> Table<T>(this IEnumerable<T> enumerable, string title = "")
         {
             Tabled?.Invoke(new ResultTable<object>()
             {

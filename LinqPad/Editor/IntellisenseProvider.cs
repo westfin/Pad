@@ -26,16 +26,16 @@ namespace LinqPad.Editor
             this.documentId = documentId;
         }
 
-        public async Task<IList<ICompletionData>> GetCompletioData(int position, char trieggerChar)
+        public async Task<CompletionResult> GetCompletioData(int position)
         {
             IList<ICompletionData> result = null;
+
             var document = this.roslynHost.GetDocument(this.documentId);
             var completionService = CompletionService.GetService(document);
 
             var data = await completionService.GetCompletionsAsync(
                 document: document,
-                caretPosition: position,
-                trigger: GetCompletionTrigger(trieggerChar)).ConfigureAwait(false);
+                caretPosition: position).ConfigureAwait(false);
 
             if (data != null && data.Items.Any())
             {
@@ -43,10 +43,10 @@ namespace LinqPad.Editor
             }
             else
             {
-                result = Array.Empty<ICompletionData>();
+                return null;
             }
 
-            return result;
+            return new CompletionResult(result, data.Span);
         }
 
         private static CompletionTrigger GetCompletionTrigger(char? triggerChar)

@@ -16,7 +16,7 @@ namespace LinqPad.Editor
 
         public int Position { get; set; }
 
-        public object ContentToShow { get; set; }
+        public object ContentToShow { get; private set; }
 
         public void SetToolTip(object content)
         {

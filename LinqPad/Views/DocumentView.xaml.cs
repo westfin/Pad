@@ -32,6 +32,23 @@ namespace LinqPad.Views
             this.InitializeComponent();
         }
 
+        private static Color GetDiagnosticColor(Diagnostic diagnostic)
+        {
+            switch (diagnostic.Severity)
+            {
+                case DiagnosticSeverity.Info:
+                    return Colors.LimeGreen;
+                case DiagnosticSeverity.Warning:
+                    return Colors.DodgerBlue;
+                case DiagnosticSeverity.Hidden:
+                    return Colors.Green;
+                case DiagnosticSeverity.Error:
+                    return Colors.Red;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
         private async void DocumentViewDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             this.viewModel = (OpenDocumentViewModel)e.NewValue;
@@ -56,24 +73,6 @@ namespace LinqPad.Views
             this.editor.AppendText(text);
             this.editor.TextChanged += this.EditorTextChanged;
             this.editor.ToolTipRequest = this.ToolTipRequest;
-        }
-
-
-        private static Color GetDiagnosticColor(Diagnostic diagnostic)
-        {
-            switch (diagnostic.Severity)
-            {
-                case DiagnosticSeverity.Info:
-                    return Colors.LimeGreen;
-                case DiagnosticSeverity.Warning:
-                    return Colors.DodgerBlue;
-                case DiagnosticSeverity.Hidden:
-                    return Colors.Green;
-                case DiagnosticSeverity.Error:
-                    return Colors.Red;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
         }
 
         private async void EditorTextChanged(object sender, EventArgs e)

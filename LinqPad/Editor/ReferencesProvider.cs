@@ -18,12 +18,15 @@ namespace LinqPad.Editor
 
         public async Task<IEnumerable<string>> GetReferences(DocumentId documentId)
         {
-            var tree = await host.GetDocument(documentId).GetSyntaxTreeAsync();
+            var tree = await this.host.GetDocument(documentId).GetSyntaxTreeAsync();
             var root = await tree.GetRootAsync() as CompilationUnitSyntax;
 
             var directives = root?.GetReferenceDirectives();
             if (directives != null)
+            {
                 return !(directives.Count > 0) ? null : directives.Select(i => i.File.ValueText);
+            }
+
             return null;
         }
     }

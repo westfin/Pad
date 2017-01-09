@@ -56,12 +56,6 @@ namespace LinqPad.Editor
 
         public Action<ToolTipArgs> ToolTipRequest { private get; set; }
 
-        public Brush CompletionBackground
-        {
-            get { return (Brush)this.GetValue(CompletionBackgroundProperty); }
-            set { this.SetValue(CompletionBackgroundProperty, value); }
-        }
-
         public SignatureHelpService SignatureHelpService
         {
             get
@@ -98,14 +92,22 @@ namespace LinqPad.Editor
             }
         }
 
+        private Brush CompletionBackground
+        {
+            get { return (Brush)this.GetValue(CompletionBackgroundProperty); }
+            set { this.SetValue(CompletionBackgroundProperty, value); }
+        }
+
         protected override void OnKeyDown(KeyEventArgs e)
         {
             base.OnKeyDown(e);
-            if (e.Key == Key.Space && e.KeyboardDevice.Modifiers.HasFlag(ModifierKeys.Control))
+            if (e.Key != Key.Space || !e.KeyboardDevice.Modifiers.HasFlag(ModifierKeys.Control))
             {
-                this.ShowCompletion().ConfigureAwait(true);
-                e.Handled = true;
+                return;
             }
+
+            this.ShowCompletion().ConfigureAwait(true);
+            e.Handled = true;
         }
 
         private static SolidColorBrush CreateDefaultCompletionBackground()
@@ -202,6 +204,15 @@ namespace LinqPad.Editor
 
         private void TextAreaTextEntering(object sender, TextCompositionEventArgs e)
         {
+            if (e.Text.Length <= 0 || this.completionWindow == null)
+            {
+                return;
+            }
+
+            if (!char.IsLetterOrDigit(e.Text[0]))
+            {
+                this.completionWindow.CompletionList.RequestInsertion(e);
+            }
         }
 
         private void TextAreaTextEntered(object sender, TextCompositionEventArgs e)
@@ -230,29 +241,27 @@ namespace LinqPad.Editor
 
             this.insightWindow?.Close();
             var results = await this.intellisenseProvider.GetCompletioData(
-                this.CaretOffset,
-                this.Document.GetCharAt(this.CaretOffset - 1)).ConfigureAwait(true);
+                position: this.CaretOffset).ConfigureAwait(true);
 
-            if (results?.Any() == true && this.completionWindow == null)
+            if (results?.CompletionList.Any() == true && this.completionWindow == null)
             {
                 this.completionWindow = new LinqPadCompletionWindow(this.TextArea)
                 {
                     Background = this.CompletionBackground,
-                    CloseWhenCaretAtBeginning = false,
+                    CloseWhenCaretAtBeginning = true,
                 };
 
                 this.completionWindow.CompletionList.IsFiltering = true;
                 var data = this.completionWindow.CompletionList.CompletionData;
-                foreach (var item in results)
+                foreach (var item in results.CompletionList)
                 {
                     data.Add(item);
                 }
 
+                Debug.WriteLine(results.CompletionSpan);
+                this.completionWindow.StartOffset = results.CompletionSpan.Start;
                 this.completionWindow.Show();
-                this.completionWindow.Closed += delegate
-                {
-                    this.completionWindow = null;
-                };
+                this.completionWindow.Closed += delegate { this.completionWindow = null; };
             }
         }
 

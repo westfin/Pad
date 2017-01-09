@@ -99,11 +99,6 @@ namespace LinqPad.ViewModels
             this.DocumentId = this.MainViewModel.LinqPadEditorHost.AddDocument(container);
         }
 
-        public Document GetDocument()
-        {
-            return this.MainViewModel.LinqPadEditorHost.GetDocument(this.DocumentId);
-        }
-
         public async Task<string> LoadText()
         {
             if (this.Document == null)
@@ -139,18 +134,19 @@ namespace LinqPad.ViewModels
 
             try
             {
-                await this.scriptRunner.ExecuteAsync(code: code, token: this.cancellationTokenSource.Token)
-                    .ConfigureAwait(true);
+                await this.scriptRunner.ExecuteAsync(code: code, token: this.cancellationTokenSource.Token);
             }
             catch (CompilationErrorException e)
             {
+
                 foreach (var diagnostic in e.Diagnostics)
                 {
                     this.Results.Add(new ResultObject(
-                        value: diagnostic,
-                        depth: 0,
-                        header: "exception"));
+                            value: diagnostic,
+                            depth: 0,
+                            header: "<compile time exception>"));
                 }
+                        
             }
             catch (Exception e)
             {
@@ -170,13 +166,15 @@ namespace LinqPad.ViewModels
 
         private void Stop()
         {
-            if (this.cancellationTokenSource != null)
-            {
-                this.cancellationTokenSource.Cancel();
-                this.cancellationTokenSource.Dispose();
-            }
+            //if (this.cancellationTokenSource != null)
+            //{
+            //    this.cancellationTokenSource.Cancel();
+            //    this.cancellationTokenSource.Dispose();
+            //}
 
-            this.cancellationTokenSource = new CancellationTokenSource();
+            //this.cancellationTokenSource = new CancellationTokenSource();
+
+            this.scriptRunner.StopScritp();
         }
 
         private async Task<string> GetTextCode()

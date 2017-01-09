@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="LinqPad.Editor.LinqPadEditor">
+    <Position X="5" Y="0.75" Width="2.75" />
+    <NestedTypes>
+      <Class Name="LinqPad.Editor.LinqPadEditor.LinqPadCompletionWindow" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Editor\LinqPadEditor.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Class>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>ACAABAAAIIAAAAAAOAAADEAACIoIAAAAAAABAAAQCAA=</HashCode>
+      <FileName>Editor\LinqPadEditor.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="SignatureHelpService" />
+      <Property Name="IntellisenseProvider" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="LinqPad.Editor.SignatureHelpService">
+    <Position X="9.5" Y="0.5" Width="2.75" />
+    <TypeIdentifier>
+      <HashCode>CAABAAAAAAAAAAgAAABAgAAQBAAAABAAAAgAgAAAAAA=</HashCode>
+      <FileName>Editor\SignatureHelpService.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="LinqPad.Editor.IntellisenseProvider">
+    <Position X="9.5" Y="4.25" Width="2.75" />
+    <TypeIdentifier>
+      <HashCode>CAAAAAAAAAAAAAAABAAAAAAAAAAAAgAAAAAIAAAAAAA=</HashCode>
+      <FileName>Editor\IntellisenseProvider.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>
