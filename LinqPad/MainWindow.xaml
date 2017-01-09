@@ -49,6 +49,7 @@
                 </Style>
             </HierarchicalDataTemplate.ItemContainerStyle>
         </HierarchicalDataTemplate>
+        
         <!-- ChartViewModel -->
         <DataTemplate DataType="{x:Type models:ChartViewModel}">
             <DockPanel>

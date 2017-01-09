@@ -106,7 +106,7 @@ namespace LinqPad.Editor
                 return;
             }
 
-            this.ShowCompletion().ConfigureAwait(true);
+            this.ShowCompletion(false).ConfigureAwait(true);
             e.Handled = true;
         }
 
@@ -217,10 +217,10 @@ namespace LinqPad.Editor
 
         private void TextAreaTextEntered(object sender, TextCompositionEventArgs e)
         {
-            this.ShowCompletion().ConfigureAwait(true);
+            this.ShowCompletion(true).ConfigureAwait(true);
         }
 
-        private async Task ShowCompletion()
+        private async Task ShowCompletion(bool mode)
         {
             var help = await this.signatureHelpService.GetSignatureHelp(this.CaretOffset);
             if (help != null)
@@ -241,7 +241,8 @@ namespace LinqPad.Editor
 
             this.insightWindow?.Close();
             var results = await this.intellisenseProvider.GetCompletioData(
-                position: this.CaretOffset).ConfigureAwait(true);
+                position: this.CaretOffset,
+                trieggerChar: mode ? this.Document.GetCharAt(this.CaretOffset - 1) : (char?)null).ConfigureAwait(true);
 
             if (results?.CompletionList.Any() == true && this.completionWindow == null)
             {
@@ -258,7 +259,6 @@ namespace LinqPad.Editor
                     data.Add(item);
                 }
 
-                Debug.WriteLine(results.CompletionSpan);
                 this.completionWindow.StartOffset = results.CompletionSpan.Start;
                 this.completionWindow.Show();
                 this.completionWindow.Closed += delegate { this.completionWindow = null; };

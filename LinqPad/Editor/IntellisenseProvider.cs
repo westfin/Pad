@@ -26,7 +26,7 @@ namespace LinqPad.Editor
             this.documentId = documentId;
         }
 
-        public async Task<CompletionResult> GetCompletioData(int position)
+        public async Task<CompletionResult> GetCompletioData(int position, char? trieggerChar)
         {
             IList<ICompletionData> result = null;
 
@@ -35,7 +35,9 @@ namespace LinqPad.Editor
 
             var data = await completionService.GetCompletionsAsync(
                 document: document,
-                caretPosition: position).ConfigureAwait(false);
+                caretPosition: position,
+                trigger: GetCompletionTrigger(trieggerChar)).ConfigureAwait(false);
+
 
             if (data != null && data.Items.Any())
             {
