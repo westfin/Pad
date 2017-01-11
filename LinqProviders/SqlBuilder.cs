@@ -11,17 +11,6 @@ namespace LinqProviders
     {
         private readonly StringBuilder sb;
 
-        public IEnumerable<OleDbParameter> Params { get; set; }
-
-        public string SheetName { private get; set; }
-
-        private string Aggregate { get; set; }
-
-        public string FromClause { get; set; }
-
-        public string WhereClause { private get; set; }
-
-        public string OrderByClause { get; set; }
 
         public SqlBuilder()
         {
@@ -30,8 +19,27 @@ namespace LinqProviders
             this.sb = new StringBuilder();
         }
 
+        public IEnumerable<OleDbParameter> Params { get; set; }
+
+        public string SheetName { private get; set; }
+
+        public string FromClause { get; set; }
+
+        public string WhereClause { private get; set; }
+
+        public string OrderByClause { get; set; }
+
+        public bool IsCountResult { get; set; }
+
+        private string Aggregate { get; set; }
+
         public override string ToString()
         {
+            if (this.IsCountResult)
+            {
+                this.Aggregate = "COUNT(*)";
+            }
+
             this.sb.Append($"SELECT {this.Aggregate} FROM [{this.SheetName}] {this.WhereClause}");
             return this.sb.ToString();
         }

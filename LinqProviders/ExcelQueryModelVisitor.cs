@@ -10,11 +10,16 @@ using Remotion.Data.Linq.Collections;
 
 namespace LinqProviders
 {
+    using Remotion.Data.Linq.Clauses.ResultOperators;
+    using Remotion.FunctionalProgramming;
+
     public class ExcelQueryModelVisitor : QueryModelVisitorBase
     {
         private readonly ExcelQueryArgs args;
 
         public SqlBuilder Builder { get; }
+
+        public bool IsSingleResult { get; private set; }
 
         public ExcelQueryModelVisitor(ExcelQueryArgs args)
         {
@@ -47,7 +52,7 @@ namespace LinqProviders
 
         public override void VisitWhereClause(WhereClause whereClause, QueryModel queryModel, int index)
         {
-            var whereVisitor = new WhereClauseExpressionTree(args);
+            var whereVisitor = new WhereClauseExpressionTree(this.args);
             whereVisitor.VisitExpression(whereClause.Predicate);
             this.Builder.WhereClause = whereVisitor.WhereClause;
             this.Builder.Params      = whereVisitor.Params;
@@ -56,6 +61,13 @@ namespace LinqProviders
 
         public override void VisitResultOperator(ResultOperatorBase resultOperator, QueryModel queryModel, int index)
         {
+            var countResult = resultOperator as CountResultOperator;
+            if (countResult != null)
+            {
+                this.Builder.IsCountResult = true;
+                this.IsSingleResult = true;
+            }
+
             base.VisitResultOperator(resultOperator, queryModel, index);
         }
 

@@ -1,4 +1,4 @@
-﻿using Remotion.Data.Linq.Parsing.Structure;
+﻿using Remotion.Linq.Parsing.Structure;
 using System;
 using System.Collections.Generic;
 using System.Data.OleDb;

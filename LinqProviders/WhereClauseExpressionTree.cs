@@ -79,16 +79,18 @@ namespace LinqProviders
         {
             var prop = expression.Member as PropertyInfo;
             var columns = ExcelHelperClass.GetColumnNames(args);
-            if (prop != null)
+            if (prop == null)
             {
-                var columnNameProp = prop.GetCustomAttribute<ExcelColumnAttribute>();
-                if (!columns.Contains(columnNameProp.ColumnName))
-                {
-                    throw new MappingException(columnNameProp.ColumnName, args);
-                }
-
-                this.whereClause.Append($" {columnNameProp.ColumnName} ");
+                return expression;
             }
+
+            var columnNameProp = prop.GetCustomAttribute<ExcelColumnAttribute>();
+            if (!columns.Contains(columnNameProp.ColumnName))
+            {
+                throw new MappingException(columnNameProp.ColumnName, this.args);
+            }
+
+            this.whereClause.Append($" {columnNameProp.ColumnName} ");
 
             return expression;
         }
