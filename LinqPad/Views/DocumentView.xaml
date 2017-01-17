@@ -57,10 +57,10 @@
             </ProgressBar>
 
             <editor:LinqPadEditor Grid.Row="2"
-                x:Name="editor"
+                x:Name="Editor"
                 SyntaxHighlighting="C#"
                 FontFamily="Consolas"
-                FontSize="10pt"/>
+                FontSize="12pt"/>
             <GridSplitter Grid.Row="3"
                           Grid.Column="0"
                           ResizeDirection="Rows"

@@ -12,8 +12,6 @@ using LinqPad.Commands;
 using LinqPad.Editor;
 using LinqPad.Execution;
 
-using LinqPadHosting;
-
 using Microsoft.CodeAnalysis;
 
 namespace LinqPad.ViewModels
@@ -26,7 +24,6 @@ namespace LinqPad.ViewModels
     {
         private readonly ScriptRunner scriptRunner;
 
-        private readonly LinqPadHost linqPadHost;
 
         private readonly Dispatcher dispatcher;
 
@@ -47,10 +44,6 @@ namespace LinqPad.ViewModels
             this.scriptRunner = new ScriptRunner(
                 refs: mainViewModel.LinqPadEditorHost.DefaultReferences.OfType<PortableExecutableReference>().Select(i => i.FilePath),
                 imps: mainViewModel.LinqPadEditorHost.DefaultImports);
-
-            this.linqPadHost = new LinqPadHost(
-                    references: mainViewModel.LinqPadEditorHost.DefaultReferences.OfType<PortableExecutableReference>().Select(i => i.FilePath),
-                    imports: mainViewModel.LinqPadEditorHost.DefaultImports);
 
             this.scriptRunner.Dumped += this.ScriptRunnerDumped;
             this.Results = new ObservableCollection<ResultObject>();

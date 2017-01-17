@@ -52,14 +52,14 @@ namespace LinqPad.Views
         private async void DocumentViewDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             this.viewModel = (OpenDocumentViewModel)e.NewValue;
-            var container = new LinqPadSourceTextContainer(this.editor);
+            var container = new LinqPadSourceTextContainer(this.Editor);
             this.viewModel.Init(container);
 
-            this.editor.IntellisenseProvider = new IntellisenseProvider(
+            this.Editor.IntellisenseProvider = new IntellisenseProvider(
                 this.viewModel.MainViewModel.LinqPadEditorHost,
                 this.viewModel.DocumentId);
 
-            this.editor.SignatureHelpService = new SignatureHelpService(
+            this.Editor.SignatureHelpService = new SignatureHelpService(
                 this.viewModel.MainViewModel.LinqPadEditorHost,
                 this.viewModel.DocumentId);
 
@@ -67,12 +67,12 @@ namespace LinqPad.Views
 
             this.referencesProvider = new ReferencesProvider(this.viewModel.MainViewModel.LinqPadEditorHost);
             this.diagnosticService  = new DiagnosticsService(this.viewModel.MainViewModel.LinqPadEditorHost);
-            this.colorizerService   = new LnqPadColorizerService(this.editor);
-            this.editor.TextArea.TextView.BackgroundRenderers.Add(this.colorizerService);
+            this.colorizerService   = new LnqPadColorizerService(this.Editor);
+            this.Editor.TextArea.TextView.BackgroundRenderers.Add(this.colorizerService);
 
-            this.editor.AppendText(text);
-            this.editor.TextChanged += this.EditorTextChanged;
-            this.editor.ToolTipRequest = this.ToolTipRequest;
+            this.Editor.AppendText(text);
+            this.Editor.TextChanged += this.EditorTextChanged;
+            this.Editor.ToolTipRequest = this.ToolTipRequest;
         }
 
         private async void EditorTextChanged(object sender, EventArgs e)
@@ -107,7 +107,7 @@ namespace LinqPad.Views
                 return;
             }
 
-            var offset = this.editor.Document.GetOffset(args.LogicalPosition);
+            var offset = this.Editor.Document.GetOffset(args.LogicalPosition);
 
             var markersAtOffset = this.colorizerService.GetMarkersAtOffset(offset);
             var markerWithToolTip = markersAtOffset.FirstOrDefault(marker => marker.ToolTip != null);

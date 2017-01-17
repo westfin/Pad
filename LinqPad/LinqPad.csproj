@@ -385,10 +385,6 @@
     <Analyzer Include="..\packages\Microsoft.CodeAnalysis.Analyzers.1.1.0\analyzers\dotnet\cs\Microsoft.CodeAnalysis.CSharp.Analyzers.dll" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\LinqPadHosting\LinqPadHosting.csproj">
-      <Project>{7ab7d5f7-0088-45a7-97f3-097b6760a5a4}</Project>
-      <Name>LinqPadHosting</Name>
-    </ProjectReference>
     <ProjectReference Include="..\LinqProviders\LinqProviders.csproj">
       <Project>{5324aaa9-b081-4062-8127-01ac4ddb4114}</Project>
       <Name>LinqProviders</Name>
